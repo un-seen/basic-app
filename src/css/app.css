@@ -1,0 +1,18 @@
+.app {
+  display: block;
+}
+
+.bar {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  justify-content: space-between;
+  height: 5%;
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
+}
+

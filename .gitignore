@@ -1,0 +1,19 @@
+.DS_Store
+data
+.parcel-cache
+.cache
+.firebase
+.env
+dist/
+target/
+node_modules/*
+static/
+package-lock.json
+bundler/dist
+*.fbx
+*.glb
+
+# Local Netlify folder
+.netlify
+Cargo.lock
+pkg
