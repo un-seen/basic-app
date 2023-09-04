@@ -19,7 +19,6 @@ class ChatUI {
   private uiChatInput: HTMLInputElement;
   private uiChatInfoLabel: HTMLLabelElement;
   private chat: ChatInterface;
-  private localChat: ChatInterface;
   private config: AppConfig = meta;
   private selectedModel: string;
   private chatLoaded = false;
@@ -28,10 +27,9 @@ class ChatUI {
   // all requests send to chat are sequentialized
   private chatRequestChain: Promise<void> = Promise.resolve();
 
-  constructor(chat: ChatInterface, localChat: ChatInterface) {
+  constructor(chat: ChatInterface) {
     // use web worker to run chat generation in background
     this.chat = chat;
-    this.localChat = localChat;
     // get the elements
     this.uiChat = getElementAndCheck("chatui-chat");
     this.uiChatInput = getElementAndCheck("chatui-input") as HTMLInputElement;
@@ -51,7 +49,6 @@ class ChatUI {
     };
 
     const modelSelector = getElementAndCheck("chatui-select") as HTMLSelectElement;
-    console.log(`Adding models to model selector`)
     for (let i = 0; i < this.config.model_list.length; ++i) {
       const item = this.config.model_list[i];
       const opt = document.createElement("option");
@@ -60,15 +57,6 @@ class ChatUI {
       opt.selected = (i == 0);
       modelSelector.appendChild(opt);
     }
-    // Append local server option to the model selector
-    const localServerOpt = document.createElement("option");
-    localServerOpt.value = "Local Server";
-    localServerOpt.innerHTML = "Local Server";
-    modelSelector.append(localServerOpt);
-    this.selectedModel = modelSelector.value;
-    modelSelector.onchange = () => {
-      this.onSelectChange(modelSelector);
-    };
   }
   /**
    * Push a task to the execution queue.
@@ -186,9 +174,7 @@ class ChatUI {
     this.chat.setInitProgressCallback(initProgressCallback);
 
     try {
-      if (this.selectedModel != "Local Server") {
         await this.chat.reload(this.selectedModel, undefined, this.config);
-      }
     } catch (err) {
       this.appendMessage("error", "Init error, " + err.toString());
       console.log(err.stack);
@@ -225,22 +211,15 @@ class ChatUI {
     const callbackUpdateResponse = (step, msg) => {
       this.updateLastMessage("left", msg);
     };
-
     try {
-      if (this.selectedModel == "Local Server") {
-        const output = await this.localChat.generate(prompt, callbackUpdateResponse);
-        this.updateLastMessage("left", output);
-        this.uiChatInfoLabel.innerHTML = await this.localChat.runtimeStatsText();
-      } else {
         console.log(`Requesting generate with prompt: ${prompt}`)
         const output = await this.chat.generate(prompt, callbackUpdateResponse);
         this.updateLastMessage("left", output);
         this.uiChatInfoLabel.innerHTML = await this.chat.runtimeStatsText();
-      }
     } catch (err) {
-      this.appendMessage("error", "Generate error, " + err.toString());
-      console.log(err.stack);
-      await this.unloadChat();
+        this.appendMessage("error", "Generate error, " + err.toString());
+        console.log(err.stack);
+        await this.unloadChat();
     }
     this.uiChatInput.setAttribute("placeholder", "Enter your message...");
     this.requestInProgress = false;

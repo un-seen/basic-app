@@ -13,10 +13,8 @@ if (useWebWorker) {
     new URL('./adapter/worker.ts', import.meta.url),
     {type: 'module'}
   ));
-  localChat = new ChatRestModule();
 } else {
   chat = new ChatModule();
-  localChat = new ChatRestModule();
 }
-new ChatUI(chat, localChat);
+new ChatUI(chat);
 
