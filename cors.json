@@ -1,0 +1,10 @@
+[
+  {
+    "origin": [
+      "https://localhost:1234",
+      "https://rohtas.studio/"
+    ],
+    "method": ["GET"],
+    "maxAgeSeconds": 5600
+  }
+]
