@@ -20,8 +20,8 @@
     margin-left: 1rem;
     z-index: 3;
     position: fixed;
-    top: 80vh;
-    left: 75vw;
+    top: 30vh;
+    left: 85vw;
 }
 
 canvas {

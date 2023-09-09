@@ -9,6 +9,8 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <link rel="stylesheet" href="/css/chat.css">
+<link rel="stylesheet" href="/css/circle.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <!-- <script>
     // draw the FPS
@@ -29,19 +31,32 @@
     })()
 </script> -->
 <body>
-    <div id="heading">
-        Dilbert AI
+    <div id="landing">
+        <img src="/assets/dilbertai.png" alt="Logo" class="logo" style="width: auto; height: auto; margin: auto">
     </div>
+    <div id="heading">
+        <div class="circular-image">
+            <img src="https://yt3.googleusercontent.com/ytc/AOPolaSzV4MEjEfTMjCCWnZrT4pQ36QEDS8s9wr5Ic-BcC8=s176-c-k-c0x00ffffff-no-rj" alt="Circular Photo">
+        </div>
+        <div style="height: 5vh;">
 
+        </div>
+        <div class="circular-image">
+            <img src="https://ca.slack-edge.com/T032RRDEUPK-U032RRMBXJM-641947e3f352-512" alt="Circular Photo">
+        </div>
+    </div>
+    
     <input type="checkbox" id="catalog-show">
 
     <select id="chatui-select">
     </select>
-    
+
+    <button id="signin" class="chatui-send-btn">Sign In</button>
+
+    <div id="server-health">Server Disconnected ❌</div>
     <div class="chatui">
       <div class="chatui-chat" id="chatui-chat" height="100">
       </div>
-    
       <div class="chatui-inputarea">
         <input id="chatui-input" type="text" class="chatui-input"  placeholder="Enter your message...">
         <button id="chatui-send-btn" class="chatui-send-btn">Send</button>
@@ -49,7 +64,11 @@
     </div>
     
     <div class="chatui-extra-control">
-      <button id="chatui-reset-btn" class="chatui-reset-btn">Reset</button>
+      <button id="chatui-reset-btn" class="chatui-btn">Reset</button>
+      <input type="file" id="chatui-file-input" style="display: none;">
+      <button id="chatui-upload-btn" class="chatui-btn">
+        <i class="fa-solid fa-image"></i>
+      </button>
       <label id="chatui-info-label"></label>
     </div>
     <!--- Place script after ui to make sure ui loads first -->
@@ -58,15 +77,18 @@
 <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
 <script type="module" src="/modules/main.ts"></script>
 <script>
-    const checkbox = document.getElementById('catalog-show');
-    const div = document.getElementById('chatui-select');
-    checkbox.addEventListener('change', function() {
+    const landing = document.getElementById('landing');
+    landing.onclick = function() {
+        landing.style.display = 'none';
+    }
+    document.getElementById('catalog-show').addEventListener('change', function() {
         // Toggle the visibility of the div based on checkbox state
+        const div = document.getElementById('chatui-select');
         if (checkbox.checked) {
           div.style.display = 'block';
         } else {
           div.style.display = 'none';
         }
-      });
+    });
 </script>
 </html>

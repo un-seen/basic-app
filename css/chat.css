@@ -1,3 +1,7 @@
+#server-health {
+    user-select: none;
+}
+
 .chatui {
     display: flex;
     flex-flow: column wrap;
@@ -97,7 +101,7 @@
     background: #ddd;
   }
  
-  .chatui-reset-btn {
+  .chatui-btn {
     margin-left: 10px;
     background: #ececec;
     font-weight: bold;
@@ -106,7 +110,7 @@
     cursor: pointer;
   }
  
-  .chatui-reset-btn:hover {
+  .chatui-btn:hover {
    background: #dcdada;
  }
  
