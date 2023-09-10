@@ -1,6 +1,6 @@
 import meta from "./meta";
 import { ChatInterface, ModelRecord } from "@mlc-ai/web-llm";
-import chintanjs, { Library } from 'chintanjs';
+import { Library } from 'hedwigai';
 import { PromptData, llamaV2Prompt } from "./prompter";
 import config from '../config';
 
@@ -29,12 +29,12 @@ class ChatUI {
   // We use a request chain to ensure that
   // all requests send to chat are sequentialized
   private chatRequestChain: Promise<void> = Promise.resolve();
-  private library: chintanjs.Library;
+  private library: Library;
 
   constructor(chat: ChatInterface) {
     // use web worker to run chat generation in background
     this.chat = chat;
-    this.library = new Library({email: config.email, password: config.password});
+    this.library = new Library({email: config.email, password: config.password, url: config.url});
     // get the elements
     this.uiChat = getElementAndCheck("chatui-chat");
     this.uiChatInput = getElementAndCheck("chatui-input") as HTMLInputElement;

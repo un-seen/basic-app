@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "npx parcel --https index.html",
-    "build": "npx parcel build"
+    "build": "npx parcel build",
+    "clean": "rm -rf dist && rm -rf .parcel-cache && rm -rf node_modules && rm -rf package-lock.json"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "perf_hooks": "^0.0.1",
     "process": "^0.11.10",
     "randomstring": "^1.2.2",
+    "hedwigai": "^0.1.2",
     "regenerator-runtime": "^0.13.9",
     "tslib": "^2.3.1",
     "wasm-pack": "^0.10.3"
@@ -36,7 +38,6 @@
   "devDependencies": {
     "@babel/core": "^7.16.7",
     "@babel/preset-env": "^7.16.8",
-    "@types/dat.gui": "^0.7.7",
     "@types/node": "^17.0.45",
     "@types/numeric": "^1.2.2",
     "@types/randomstring": "^1.1.8",
