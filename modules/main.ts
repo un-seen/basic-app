@@ -1,11 +1,11 @@
 // Import internal libraries
 // import oxidizer from './oxidizer/Cargo.toml';
 import adapterConfig from "./adapter/meta";
-import { ChatInterface, ChatModule, ChatWorkerClient } from "@mlc-ai/web-llm";
+import { ChatInterface, ChatModule, ChatRestModule, ChatWorkerClient, ModelRecord } from "@mlc-ai/web-llm";
 import { ChatUI } from './adapter/chat';
 import * as dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 const useWebWorker = adapterConfig.use_web_worker;
 let chat: ChatInterface;
 
@@ -17,5 +17,5 @@ if (useWebWorker) {
 } else {
   chat = new ChatModule();
 }
-new ChatUI(chat);
+window.chatui = new ChatUI(chat);
 

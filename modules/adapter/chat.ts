@@ -61,16 +61,16 @@ class ChatUI {
     const library = this.library;
     fileInput.addEventListener("change", function () {
         // Display the selected file name
-        const files = fileInput.files as FileList;
-        for(const file of files) {
+        if (fileInput.files?.length === 0) {
+            ThisUI.appendMessage("left", "No file selected");
+        } else {
+            const file = fileInput.files[0] as File;
             library.storeAsset(file).then((res) => {
                 ThisUI.appendMessage("left", res["message"])
-                library.indexAsset().then((res) => {
-                    ThisUI.appendMessage("left", res["message"])
-                }).then(() => {
-                    library.listAsset().then((res) => {
-                        ThisUI.appendMessage("left", res["response"])
-                    })
+            }).then(() => {
+                library.listAsset()
+                .then((res) => {
+                    ThisUI.appendMessage("left", `Here are the files in your library: \n *${res.join('\n * ')}`)
                 })
             })
         }

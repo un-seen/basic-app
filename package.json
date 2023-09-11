@@ -7,7 +7,7 @@
   "scripts": {
     "start": "npx parcel --https index.html",
     "build": "npx parcel build",
-    "clean": "rm -rf dist && rm -rf .parcel-cache && rm -rf node_modules && rm -rf package-lock.json"
+    "clean": "rm -rf dist && rm -rf .parcel-cache && rm -rf node_modules/hedwigai && rm -rf package-lock.json"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
     "perf_hooks": "^0.0.1",
     "process": "^0.11.10",
     "randomstring": "^1.2.2",
-    "hedwigai": "^0.1.2",
     "regenerator-runtime": "^0.13.9",
     "tslib": "^2.3.1",
     "wasm-pack": "^0.10.3"
