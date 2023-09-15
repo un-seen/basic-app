@@ -3,13 +3,19 @@
     src: url("./fonts/Roboto/Roboto-Light.ttf");
 }
 
-.control {
-    font-size: 1.5rem;
+#root {
+    background-color: #FCFCFC;
 }
 
-#overlay {
-    position: absolute;
+html {
+    background-color: #FCFCFC;
+}
+
+.bar {
     display: flex;
+    flex-direction: row;
+    color: black;
+    justify-content: space-between;
 }
 
 #heading {
@@ -20,72 +26,13 @@
     margin-left: 1rem;
     z-index: 3;
     position: fixed;
-    top: 30vh;
-    left: 85vw;
+    top: 20vh;
+    left: 65vw;
 }
 
-canvas {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-}
-
-.filecontrols {
-    position: fixed;
-    top: 90vh;
-    left: 5vw;
-    z-index: 3;
-}
-
-#palette {
-    z-index: 10;
-    flex-direction: column;
-    position: fixed;
-    top: 5vh;
-    left: 0.5vw;
-    padding: 5px;
-    gap: 5px;
-    display: none;
-}
-
-.palettecolor {
-    width: 2vw;
-    height: 2vh;
-    border-color: black;
-    border-style: solid;
-    border-width: 1px;
-}
-
-#canvas3d {
-    background-color: black;
-    width: 100vw;
-    position: fixed;
-    left: 100vw;
-}
-
-#leftbar {
-    background-color: white;
-    width: 10vw;
-    height: 100vh;
-    position: fixed;
-    top: 0vh;
-    box-sizing: border-box;
-}
-
-.canvasbuffer {
-    display: none;
-}
-
-#matter {
-    position: fixed;
-    top: 0vh;
-    left: 0vw;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1;
-    display: flex;
-    flex-direction: row;
-    row-gap: 0;
+#heading > #title {
+    margin-left: 10vw;
+    color: rgb(0, 0, 0);
 }
 
 #landing {

@@ -65,6 +65,7 @@ class ChatUI {
             ThisUI.appendMessage("left", "No file selected");
         } else {
             const file = fileInput.files[0] as File;
+            console.log(file.name)
             library.storeAsset(file).then((res) => {
                 ThisUI.appendMessage("left", res["message"])
             }).then(() => {
@@ -161,7 +162,7 @@ class ChatUI {
   }
 
   // Internal helper functions
-  private appendMessage(kind: string, text: string, image_url=null) {
+  private appendMessage(kind: string, text: string, image_url: string | null =null, video_url: string | null = null) {
     if (kind == "init") {
       text = "[System Initalize] " + text;
     }
@@ -177,6 +178,17 @@ class ChatUI {
             </div>
             <div class="msg-bubble">
                 <div class="msg-text">${text}</div>
+                ${video_url !== null ? `<video width="320" height="240" controls> <source src="${video_url}" type="video/mp4"> </video>` : ''}
+            </div>
+        </div>
+      `;
+      console.log(msg)
+    } else if (video_url !== null) {
+      msg = `
+        <div class="msg ${kind}-msg">
+            <div class="msg-bubble">
+                <div class="msg-text">${text}</div>
+                ${video_url !== null ? `<video width="320" height="240" controls> <source src="${video_url}" type="video/mp4"> </video>` : ''}
             </div>
         </div>
       `;
@@ -282,19 +294,18 @@ class ChatUI {
 
     try {
         console.log(`Requesting generate with prompt: ${prompt}`)
-        let retreiving_photos = false
         if (prompt.includes('catalog')) {
-            retreiving_photos = true
-            this.updateLastMessage("left", "Searching inventory...");
+            this.updateLastMessage("left", "Searching library...");
             const catalog = await this.library.fetchCatalog(prompt);
             this.updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
             let ct = 0;
-            let augmented_prompt = 'You are an AI sales assistant for a home inventory store company. You know about these pieces of furniture:'
+            let augmented_prompt = 'You are a movie curator, and talks about movies with your friends.'
+            console.log(catalog)
             for (const item of catalog['response']) {
                 const url = item['image']
-                const text = item['caption']
+                const text = item['id']
                 this.appendMessage("left", text, url);
-                augmented_prompt += `\n * ${text}`
+                augmented_prompt += `\n * ${item['caption']}`
                 ct += 1;
                 if (ct > 1) {
                     break
@@ -313,8 +324,32 @@ class ChatUI {
             this.appendMessage("left", "Thinking...");
             const output = await this.chat.generate(newPrompt, callbackUpdateResponse);            
             this.updateLastMessage("left", output);
+        } else if (prompt.includes("seek")) {
+            this.updateLastMessage("left", "Searching library...");
+            const frames = await this.library.seekVideo(prompt);
+            console.log(`frames ${frames}`)
+            this.updateLastMessage("left", `In these videos we found what you are seeking in your prompt.`);
+            let ct = 0;
+            const videos: {[key: string]: string} = {}
+            for (const item of frames['response']) {
+                const path = item['path']
+                const url = item['url']
+                const timestamp = item['timestamp']
+                const frame = item['frame']
+                const message = `\n In the video ${path} at frame ${timestamp}`
+                this.appendMessage("left", message, frame);
+                videos[path] = url
+                ct += 1;
+                if (ct > 1) {
+                    break
+                }
+            }
+            this.appendMessage("left", `\n You can watch the videos here:`);
+            for (const key of Object.keys(videos)) {
+              this.appendMessage("left", key, null, videos[key]);
+            }
         } else {
-            let augmented_prompt = 'You are an AI sales assistant for an executive at a large trading company. You keep your answers short and sweet.'
+            let augmented_prompt = 'You are a movie curator, and talks about movies with your friends.'
             const systemPrompt: PromptData = {
                 role: "system",
                 content: augmented_prompt

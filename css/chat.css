@@ -77,7 +77,7 @@
   }
  
   .right-msg .msg-bubble {
-    background: #579ffb;
+    background: #594b31;
     color: #fff;
     border-bottom-right-radius: 0;
   }
@@ -86,6 +86,7 @@
     display: flex;
     padding: 10px;
     border-top: 2px solid #ddd;
+    border-color: #594b31;
     background: #eee;
   }
  
@@ -99,6 +100,7 @@
   .chatui-input {
     flex: 1;
     background: #ddd;
+    border-color: #594b31;
   }
  
   .chatui-btn {
@@ -116,14 +118,14 @@
  
   .chatui-send-btn {
    margin-left: 10px;
-   background: #579ffb;
+   background: #594b31;
    color: #fff;
    font-weight: bold;
    cursor: pointer;
  }
  
  .chatui-send-btn:hover {
-   background: #577bfb;
+   background: #d4b983;
  }
  
   .chatui-chat {
