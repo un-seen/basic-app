@@ -6,3 +6,6 @@ const handler = new ChatWorkerHandler(chat);
 self.onmessage = (msg: MessageEvent) => {
   handler.onmessage(msg);
 };
+
+
+export default {}
