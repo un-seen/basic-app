@@ -1,12 +1,11 @@
 import meta from "./meta";
 import { ChatInterface, ModelRecord } from "@mlc-ai/web-llm";
-import { Library } from "hedwigai";
 import { PromptData, llamaV2Prompt } from "./prompter";
-import config from "../Config";
 import React, { useEffect } from "react";
 import '../../css/chat.css';
+import { Library } from "hedwigai"
 
-interface AppConfig {
+interface ModelConfig {
   model_list: Array<ModelRecord>;
   model_lib_map: Record<string, string>;
 }
@@ -14,6 +13,7 @@ interface AppConfig {
 interface ChatProps {
   chatInterface: ChatInterface;
   deactive: boolean;
+  library: Library;
 }
 
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
@@ -26,25 +26,11 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [chatRequestChain, setChatRequestChain] = React.useState<Promise<void>>(
     Promise.resolve(),
   );
-  const [library, setLibrary] = React.useState<Library>();
-
-  const signInButton = React.useRef<HTMLButtonElement>(null);
-  const serverHealthButton = React.useRef<HTMLDivElement>(null);
+  
   const uiChat = React.useRef<HTMLDivElement>(null);
   const uiChatInput = React.useRef<HTMLInputElement>(null);
   const uiChatInfoLabel = React.useRef<HTMLLabelElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setLibrary(
-      new Library({
-        email: config.HEDWIGAI_EMAIL,
-        password: config.HEDWIGAI_PASSWORD,
-        url: config.HEDWIGAI_URL,
-      }),
-    );
-  }, [chatLoaded]);
-
   
   const queueMessage = (alignment: "left" | "right", message: string) => {
     appendMessage(alignment, message);
@@ -57,14 +43,14 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     } else {
       const file = fileInput.current.files[0] as File;
       console.log(file.name);
-      if (typeof library === "undefined") return;
-      library
+      if (typeof props.library === "undefined") return;
+      props.library
         .storeAsset(file)
         .then((result) => {
           queueMessage("left", result["message"]);
         })
         .then(() => {
-          library.listAsset().then((res) => {
+          props.library.listAsset().then((res) => {
             queueMessage(
               "left",
               `Here are the files in your library: \n *${res.join("\n * ")}`,
@@ -72,30 +58,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           });
         });
     }
-  };
-
-
-  const healthCheck = () => {
-    if (typeof library === "undefined" || serverHealthButton.current == null) return;
-    library.healthCheck().then((result) => {
-      if (result["healthy"] === "yes") {
-        serverHealthButton.current.textContent = "Server is healthy ✅";
-      } else {
-        serverHealthButton.current.textContent =
-          "Server Disconnected ❌";
-      }
-    });
-  };
-
-  const signIn = () => {
-    if (typeof library === "undefined"  || signInButton.current == null) return;
-    library.signIn().then((success: Boolean) => {
-      if (success) {
-        signInButton.current.textContent = "Signed In";
-      } else {
-        signInButton.current.textContent = "Try Sign In";
-      }
-    });
   };
 
   const registerEnterKeyOnUIChatInput = (event) => {
@@ -296,9 +258,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
 
     try {
       console.log(`Requesting generate with prompt: ${prompt}`);
-      if (prompt.includes("catalog") && typeof library !== "undefined") {
+      if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const catalog = await library.fetchCatalog(prompt);
+        const catalog = await props.library.fetchCatalog(prompt);
         updateLastMessage(
           "left",
           `Here is the personalized catalog for your prompt.`,
@@ -332,9 +294,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         appendMessage("left", "Thinking...");
         const output = await props.chatInterface.generate(newPrompt, callbackUpdateResponse);
         updateLastMessage("left", output);
-      } else if (prompt.includes("seek") && typeof library !== "undefined") {
+      } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const frames = await library.seekVideo(prompt);
+        const frames = await props.library.seekVideo(prompt);
         updateLastMessage(
           "left",
           `In these videos we found what you are seeking in your prompt.`,
@@ -358,9 +320,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         for (const key of Object.keys(videos)) {
           appendMessage("left", key, null, videos[key]);
         }
-      } else if (prompt.includes("answer") && typeof library !== "undefined") {
+      } else if (prompt.includes("answer") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const answer = await library.informUser(prompt);
+        const answer = await props.library.informUser(prompt);
         updateLastMessage("left", `Here is the answer to your question.`);
         appendMessage("left", answer["response"]);
       } else {
@@ -391,57 +353,51 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   };
 
   return (
-    <>
-      <div className="bar">
-        <button id="signin" className="chatui-send-btn" ref={signInButton} onClick={signIn}>Sign In</button>
-        <div id="server-health" ref={serverHealthButton} onClick={healthCheck}>Server Disconnected ❌</div>
+    <div className="chatui">
+      <div
+        className="chatui-chat"
+        id="chatui-chat"
+        style={{ height: "100" }}
+        ref={uiChat}
+      ></div>
+      <div className="chatui-inputarea">
+        <input
+          id="chatui-input"
+          type="text"
+          className="chatui-input"
+          ref={uiChatInput}
+          placeholder="Enter your message..."
+          onKeyDown={registerEnterKeyOnUIChatInput}
+        />
+        <button
+          id="chatui-send-btn"
+          className="chatui-send-btn"
+          onClick={onGenerate}
+        >
+          Send
+        </button>
       </div>
-      <div className="chatui">
-        <div
-          className="chatui-chat"
-          id="chatui-chat"
-          style={{ height: "100" }}
-          ref={uiChat}
-        ></div>
-        <div className="chatui-inputarea">
-          <input
-            id="chatui-input"
-            type="text"
-            className="chatui-input"
-            ref={uiChatInput}
-            placeholder="Enter your message..."
-            onKeyDown={registerEnterKeyOnUIChatInput}
-          />
-          <button
-            id="chatui-send-btn"
-            className="chatui-send-btn"
-            onClick={onGenerate}
-          >
-            Send
-          </button>
-        </div>
-        <div className="chatui-extra-control">
-          <button id="chatui-reset-btn" className="chatui-btn" onClick={onReset}>
-            Reset 🎬
-          </button>
-          <input
-            type="file"
-            id="chatui-file-input"
-            style={{ display: "none" }}
-            ref={fileInput}
-            onChange={changeFileInput}
-          />
-          <button
-            id="chatui-upload-btn"
-            className="chatui-btn"
-            onClick={() => fileInput.current.click()}
-          >
-            Add to Library 📚
-          </button>
-          <label id="chatui-info-label" ref={uiChatInfoLabel}></label>
-        </div>
+      <div className="chatui-extra-control">
+        <button id="chatui-reset-btn" className="chatui-btn" onClick={onReset}>
+          Reset 🎬
+        </button>
+        <input
+          type="file"
+          id="chatui-file-input"
+          style={{ display: "none" }}
+          ref={fileInput}
+          onChange={changeFileInput}
+        />
+        <button
+          id="chatui-upload-btn"
+          className="chatui-btn"
+          onClick={() => fileInput.current.click()}
+        >
+          Add to Library 📚
+        </button>
+        <label id="chatui-info-label" ref={uiChatInfoLabel}></label>
       </div>
-    </>
+    </div>
   );
 };
 

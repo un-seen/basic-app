@@ -1,56 +1,19 @@
-@font-face {
-  font-family: "RobotoLight";
-  src: url("./fonts/Roboto/Roboto-Light.ttf");
+.app {
+  display: flex;
+  flex-direction: column;
 }
 
-#root {
-  background-color: #fcfcfc;
+.bar {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  justify-content: space-between;
+  height: 5vh;
 }
 
-html {
-  background-color: #fcfcfc;
-}
-
-
-#landing {
-  position: fixed;
-  top: 28vh;
-  left: 65vw;
-  width: 10vw;
-  z-index: 2;
-}
-
-
-#heading {
-  color: rgb(0, 0, 0);
-  font-size: 4rem;
-  font-family: "RobotoLight";
-  user-select: none;
-  z-index: 3;
-  position: fixed;
-  top: 36vh;
-  left: 66vw;
-}
-
-#heading > #title {
-  margin-left: 10vw;
-  color: rgb(0, 0, 0);
-}
-
-/* Define a CSS class for circular images */
-.circular-image {
-  width: 150px; /* Set the desired width and height for the circular image */
-  height: 150px;
-  border-radius: 50%; /* Create a circular clipping mask */
-  overflow: hidden; /* Hide any image overflow outside the circle */
-  border-color: black;
-  user-select: none;
-}
-
-/* Additional styles for the image (optional) */
-.circular-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Maintain the aspect ratio and cover the circle */
+.main {
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
 }
 
