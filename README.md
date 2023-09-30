@@ -1,4 +1,4 @@
-## Dilbert AI
+## hedwigAI: Basic App
 
 React SDK that gives the developer access to:
 
