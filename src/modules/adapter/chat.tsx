@@ -376,8 +376,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         >
           Send
         </button>
-      </div>
-      <div className="chatui-extra-control">
         <button id="chatui-reset-btn" className="chatui-btn" onClick={onReset}>
           Reset 🎬
         </button>
@@ -393,8 +391,10 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           className="chatui-btn"
           onClick={() => fileInput.current.click()}
         >
-          Add to Library 📚
+          Add 📚
         </button>
+      </div>
+      <div className="chatui-extra-control">
         <label id="chatui-info-label" ref={uiChatInfoLabel}></label>
       </div>
     </div>

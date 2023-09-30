@@ -48,22 +48,44 @@ const SpaceUI: React.FC<SpaceProps> = (props: SpaceProps) => {
                 return sprite;
             }
         })
-        graph.onNodeClick(node => {
-            // Aim at node from outside it
-            const distance = 10;
+
+        const nodeClick = (node, distance) => {
             const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-
+  
             const newPos = node.x || node.y || node.z
-                ? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
-                : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
-
+              ? { x: node.x * distRatio - 0.5, y: node.y * distRatio, z: node.z * distRatio }
+              : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
+  
             graph.cameraPosition(
-                newPos, // new position
+              newPos, // new position
+              node, // lookAt ({ x, y, z })
+              3000  // ms transition duration
+            );
+        }
+        const calculateNewCameraPosition = (
+            cameraPosition: THREE.Vector3,
+            nodePosition: THREE.Vector3,
+            distance: number
+          ): THREE.Vector3 => {
+            // Calculate the direction vector from the camera to the node
+            const direction = nodePosition.clone().sub(cameraPosition).normalize();
+            // Compute the new camera position by moving backward along the direction vector
+            const newPosition = nodePosition.clone().sub(direction.multiplyScalar(distance));
+            return newPosition
+          }
+        graph.onNodeClick(node => {
+            console.log(`x: ${node.x}, y: ${node.y}, z: ${node.z}`);
+            // nodeClick(node, 40)
+            const newPosition = calculateNewCameraPosition(graph.cameraPosition(), new THREE.Vector3(node.x + 0.5, node.y, node.z), 38.5)
+            console.log(`position: ${newPosition.x}, ${newPosition.y}, ${newPosition.z}`)
+            graph.cameraPosition(
+                newPosition, // new position
                 node, // lookAt ({ x, y, z })
                 3000  // ms transition duration
-            );
+              );
+            window.nodeClick = nodeClick
+            window.nodeClick2 = calculateNewCameraPosition
         });
-
     }, [graphData])
 
     return (

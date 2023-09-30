@@ -144,3 +144,10 @@
   object-fit: cover; /* Maintain the aspect ratio and cover the circle */
 }
 
+#chatui-reset-btn {
+  width: 4rem;
+}
+
+#chatui-upload-btn {
+  width: 4rem;
+}
