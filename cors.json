@@ -1,0 +1,11 @@
+[
+    {
+      "origin": [
+        "https://localhost:1234",
+        "https://basic-hedwigai.web.app"
+      ],
+      "method": ["GET", "POST"],
+      "maxAgeSeconds": 5600
+    }
+  ]
+  

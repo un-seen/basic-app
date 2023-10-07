@@ -142,7 +142,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           </div>
         </div>
       `;
-      console.log(msg);
     } else if (video_url !== null) {
       msg = `
         <div class="msg ${kind}-msg">
@@ -260,20 +259,26 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       console.log(`Requesting generate with prompt: ${prompt}`);
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const catalog = await props.library.fetchCatalog(prompt);
+        const catalog = await props.library.getImage(prompt);
         updateLastMessage(
           "left",
           `Here is the personalized catalog for your prompt.`,
         );
         let ct = 0;
-        let augmented_prompt =
-          "You are a movie curator, and talks about movies with your friends.";
+        let augmentedPrompt;
+        if(prompt.includes("movie")) {
+          augmentedPrompt = "You are a movie curator, and talks about movies.";
+        } else if (prompt.includes("carpets")) {
+          augmentedPrompt = "You are a carpet conoisseur, and talks about carpets given information about samples.";
+        } else {
+          augmentedPrompt = "You are collector, and talks about your collection.";
+        }
         console.log(catalog);
         for (const item of catalog["response"]) {
           const url = item["image"];
           const text = item["id"];
           appendMessage("left", text, url);
-          augmented_prompt += `\n * ${item["caption"]}`;
+          augmentedPrompt += `\n * ${item["caption"]}`;
           ct += 1;
           if (ct > 1) {
             break;
@@ -281,12 +286,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
         const systemPrompt: PromptData = {
           role: "system",
-          content: augmented_prompt,
+          content: augmentedPrompt,
         };
         const messages: PromptData[] = [
           {
             role: "user",
-            content: "Tell me about the items in your inventory",
+            content: "Tell me about the items in the sample catalog",
           },
         ];
         const newPrompt = llamaV2Prompt(systemPrompt, messages);
@@ -299,7 +304,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         const frames = await props.library.seekVideo(prompt);
         updateLastMessage(
           "left",
-          `In these videos we found what you are seeking in your prompt.`,
+          `Here is the list of moments in the videos for your prompt.`,
         );
         let ct = 0;
         const videos: { [key: string]: string } = {};
@@ -316,21 +321,31 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
             break;
           }
         }
-        appendMessage("left", `\n You can watch the videos here:`);
-        for (const key of Object.keys(videos)) {
-          appendMessage("left", key, null, videos[key]);
-        }
-      } else if (prompt.includes("answer") && typeof props.library !== "undefined") {
+      } else if (prompt.includes("?") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const answer = await props.library.informUser(prompt);
-        updateLastMessage("left", `Here is the answer to your question.`);
-        appendMessage("left", answer["response"]);
+        const conversations = await props.library.getConversation(prompt.replaceAll("?", ""));
+        console.log(conversations);
+        let augmentedPrompt = "You are a chatterbox, who is fed questions and answers. Then uses it for reference in your conversation."
+        let ct = 0;
+        for (const item of conversations["response"]) {
+          const question = item["question"];
+          const answer = item["answer"];
+          const text = `
+          question: ${question}
+          answer: ${answer}
+          `
+          appendMessage("left", text);
+          augmentedPrompt += `\n * ${text}`;
+          ct += 1;
+          if (ct > 1) {
+            break;
+          }
+        }
       } else {
-        let augmented_prompt =
-          "You are a movie curator, and talks about movies with your friends.";
+        let augmentedPrompt = "You are quiz master, and refers to given sample questions, answers and data.";
         const systemPrompt: PromptData = {
           role: "system",
-          content: augmented_prompt,
+          content: augmentedPrompt,
         };
         const messages: PromptData[] = [
           {

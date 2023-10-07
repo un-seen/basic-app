@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo } from "react";
 import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
+import "../css/landing.css";
 import { ChatUI } from "./adapter/chat";
 import { useAuthListener, UserContext } from "./Firebase";
 import { ChatInterface, ChatModule, ChatWorkerClient } from "@mlc-ai/web-llm";
@@ -27,25 +28,30 @@ const App = () => {
   const [libraryReady, setLibraryReady] = React.useState(false);
   const signInButton = React.useRef<HTMLButtonElement>(null);
   const healthStatus = React.useRef<HTMLDivElement>(null);
+  const [email, setEmail] = React.useState<string>();
+  const [password, setPassword] = React.useState<string>();
   
   const signIn = () => {
-    if (!healthOk || library == null) return;
-    console.log("Signing in");
-    library.signIn().then((success: Boolean) => {
-      console.log("Signed in");
-      if (success) {
-        signInButton.current.textContent = "Signed In";
-        setLibraryReady(true);
-      } else {
-        signInButton.current.textContent = "Try Sign In";
-        setLibraryReady(false);
-      }
-    })
+    console.log("Creating Library Portal");
+    if (libraryReady) {
+      document.getElementById("library-email")?.setAttribute("disabled", "false");
+      document.getElementById("library-password")?.setAttribute("disabled", "false");
+      setLibraryReady(false);
+      if (signInButton.current != null) {
+        signInButton.current.textContent = "Sign In";  
+      };
+    }
+    setLibrary(
+      new Library({
+        email: email,
+        password: password,
+        url: config.HEDWIGAI_URL,
+      })
+    )
   };
 
-  
   useEffect(() => {
-    if (library == null || healthStatus.current == null) return;
+    if (typeof library == 'undefined') return;
     library.healthCheck().then((result) => {
       if (result["healthy"] === "yes") {
         healthStatus.current.textContent = "Server ✅";
@@ -56,18 +62,27 @@ const App = () => {
         setHealthOk(false)
       }
     })
+    library.signIn().then((success: Boolean) => {
+      if (success) {
+        document.getElementById("library-email")?.setAttribute("disabled", "true");
+        document.getElementById("library-password")?.setAttribute("disabled", "true");
+        signInButton.current.textContent = "Sign Out";
+        setLibraryReady(true);
+      }
+    })
   }, [library])
 
   useEffect(() => {
-    console.log("Setting up library");
-    setLibrary(
-      new Library({
-        email: config.HEDWIGAI_EMAIL,
-        password: config.HEDWIGAI_PASSWORD,
-        url: config.HEDWIGAI_URL,
-      })
-    );
-  }, []);
+    if (typeof library == 'undefined' || !libraryReady) return;
+    library.setup().then((success: Boolean) => {
+      if(!success) {
+        console.log("Failed to setup library");
+        return;
+      }
+      console.log("Successfuly setup library");
+      window.library = library
+    })
+  }, [libraryReady])
 
   return (
     <div className="app">
@@ -79,6 +94,15 @@ const App = () => {
             <img src={Asset.LANDING_LOGO} style={{"width": "2vw"}} alt="hedwigAI" />
           </div>
           <div className="controls">
+            <label>
+              Email:
+              <input id="library-email" type="text" onChange={(e) => setEmail(e.target.value)} />
+            </label>
+            <br />
+            <label>
+              Password:
+              <input id="library-password" type="password" onChange={(e) => setPassword(e.target.value)} />
+            </label>
             <button id="sign-in" ref={signInButton} onClick={signIn}>Sign In</button>
             <div id="server-health" ref={healthStatus}>Server ❌</div>
           </div>
@@ -89,6 +113,14 @@ const App = () => {
           }
           {
             libraryReady && <SpaceUI library={library}/>
+          }
+          {
+            !libraryReady && (<div className="landing">
+                <h1>hedwigAI </h1>
+                <br></br>
+                <h2>Your ai powered mind-palace</h2>
+              <img src={Asset.LANDING_LOGO} alt="hedwigAI" />
+              </div>)
           }
         </div>
     </div>

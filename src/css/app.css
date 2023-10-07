@@ -1,6 +1,5 @@
 .app {
-  display: flex;
-  flex-direction: column;
+  display: block;
 }
 
 .bar {
@@ -8,7 +7,7 @@
   flex-direction: row;
   background-color: white;
   justify-content: space-between;
-  height: 5vh;
+  height: 5%;
 }
 
 .main {

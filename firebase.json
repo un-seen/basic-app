@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "basic-hedwigai",
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

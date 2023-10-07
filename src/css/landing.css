@@ -1,0 +1,37 @@
+.landing {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    display: flex;
+    height: 86.55vh;
+    align-items: center;
+    text-align: center;
+    row-gap: 2rem;
+    margin-top: 3rem;
+    flex-direction: column;
+    overflow: hidden;
+}
+.landing > h1 {
+    font-size: 10rem;
+    user-select: none;
+    color: #000000;
+    font-weight: 100;
+    margin-bottom: 0;
+    font-family: 'Acme';
+}
+
+.landing > h2 {
+    font-size: 2rem;
+    color: #000000;
+    font-weight: 100;
+    margin-top: 0;
+}
+
+.landing > img {
+    width: 30vw;
+    object-fit: cover;
+    z-index: -1;
+    user-select: none;
+    margin-top: 0;
+}
