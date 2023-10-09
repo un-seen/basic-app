@@ -32,7 +32,6 @@ const App = () => {
   const [password, setPassword] = React.useState<string>();
   
   const signIn = () => {
-    console.log("Creating Library Portal");
     if (libraryReady) {
       document.getElementById("library-email")?.setAttribute("disabled", "false");
       document.getElementById("library-password")?.setAttribute("disabled", "false");
@@ -46,6 +45,7 @@ const App = () => {
         email: email,
         password: password,
         url: config.HEDWIGAI_URL,
+        embedded: false
       })
     )
   };
@@ -55,6 +55,13 @@ const App = () => {
     library.healthCheck().then((result) => {
       if (result["healthy"] === "yes") {
         healthStatus.current.textContent = "Server ✅";
+        setInterval(() => {
+          if(library.isWorking()) {
+            healthStatus.current.textContent = "Server 🔥";
+          } else {
+            healthStatus.current.textContent = "Server ✅";
+          }
+        }, 3000);
         setHealthOk(true)
       } else {
         healthStatus.current.textContent =
@@ -72,6 +79,11 @@ const App = () => {
     })
   }, [library])
 
+  useEffect(() => {
+    if(healthOk && typeof library != 'undefined') {
+      console.log(`Health is OK for Library[embedded=${library.isEmbedded()}]`)
+    }
+  }, [healthOk])
   useEffect(() => {
     if (typeof library == 'undefined' || !libraryReady) return;
     library.setup().then((success: Boolean) => {
@@ -118,7 +130,7 @@ const App = () => {
             !libraryReady && (<div className="landing">
                 <h1>hedwigAI </h1>
                 <br></br>
-                <h2>Your ai powered mind-palace</h2>
+                <h2>Your ai powered knowledge graph</h2>
               <img src={Asset.LANDING_LOGO} alt="hedwigAI" />
               </div>)
           }

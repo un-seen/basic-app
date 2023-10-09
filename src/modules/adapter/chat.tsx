@@ -208,7 +208,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       console.log("chat already loaded")
       return
     };
-    console.log("loading chat")
     setRequestInProgress(true);
     appendMessage("init", "");
     const initProgressCallback = (report) => {
