@@ -4,7 +4,7 @@ import "firebase/firestore";
 import "firebase/storage";
 import { createContext, useState, useEffect } from "react";
 import { User } from "@firebase/auth-types";
-import Config from "./Config";
+import Config from "./config";
 
 const firebaseConfig = {
   apiKey: Config.FIREBASE_API_KEY,

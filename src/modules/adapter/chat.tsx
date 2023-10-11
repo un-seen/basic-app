@@ -1,28 +1,16 @@
-import meta from "./meta";
-import { ChatInterface, ModelRecord } from "@mlc-ai/web-llm";
-import { PromptData, llamaV2Prompt } from "./prompter";
 import React, { useEffect } from "react";
 import '../../css/chat.css';
 import { Library } from "hedwigai"
-
-interface ModelConfig {
-  model_list: Array<ModelRecord>;
-  model_lib_map: Record<string, string>;
-}
+import { PromptData, llamaV2Prompt } from "./prompter";
 
 interface ChatProps {
-  chatInterface: ChatInterface;
   deactive: boolean;
   library: Library;
 }
 
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [chatLoaded, setChatLoaded] = React.useState<boolean>(false);
-  const [requestInProgress, setRequestInProgress] =
-    React.useState<boolean>(false);
-  const [selectedModel, setSelectedModel] = React.useState<string>(
-    meta.default_model,
-  );
+  const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
   const [chatRequestChain, setChatRequestChain] = React.useState<Promise<void>>(
     Promise.resolve(),
   );
@@ -82,7 +70,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   // the tasks previous tasks, which causes them to early stop
   // can be interrupted by chat.interruptGenerate
   const onGenerate = () => {
-    console.log(`onGenerate called ${requestInProgress}`)
     if (requestInProgress) {
       return;
     }
@@ -94,26 +81,24 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   useEffect(() => {
     if (requestInProgress) {
       // interrupt previous generation if any
-      props.chatInterface.interruptGenerate();
+      props.library.interruptGenerateResponse();
     }
     // try reset after previous requests finishes
     pushTask(async () => {
-      await props.chatInterface.resetChat();
       resetChatHistory();
-      await asyncUnloadChat();
+      console.log(`Initalizing chat`)
       await asyncInitChat();
     });
-  }, [selectedModel]);
+  }, []);
 
   const onReset = () => {
     if (requestInProgress) {
       // interrupt previous generation if any
-      props.chatInterface.interruptGenerate();
+      props.library.interruptGenerateResponse();
     }
     // try reset after previous requests finishes
     pushTask(async () => {
-      await props.chatInterface.resetChat();
-      resetChatHistory();
+      await props.library.resetGenerateResponse(async () => resetChatHistory());
     });
   };
 
@@ -164,8 +149,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         </div>
       `;
     }
-    uiChat?.current.insertAdjacentHTML("beforeend", msg);
-    uiChat?.current.scrollTo(0, uiChat.current.scrollHeight);
+    uiChat?.current?.insertAdjacentHTML("beforeend", msg);
+    uiChat?.current?.scrollTo(0, uiChat.current.scrollHeight);
   };
 
   const updateLastMessage = (kind: string, text: string) => {
@@ -208,19 +193,17 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       console.log("chat already loaded")
       return
     };
-    setRequestInProgress(true);
+    console.log(`asyncInitChat called`)
     appendMessage("init", "");
-    const initProgressCallback = (report) => {
-      updateLastMessage("init", report.text);
-    };
-    props.chatInterface.setInitProgressCallback(initProgressCallback);
-
+    setRequestInProgress(true);
     try {
-      await props.chatInterface.reload(selectedModel, undefined, meta);
+      console.log(`loading library runtime`)
+      await props.library.reloadRuntime((report) => updateLastMessage("init", report.text));
+      console.log(`completed loading library runtime`)
     } catch (err) {
       appendMessage("error", "Init error, " + err.toString());
       console.log(err.stack);
-      await asyncUnloadChat();
+      await props.library.unloadRuntime();
       setRequestInProgress(false);
       return;
     }
@@ -228,26 +211,21 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     setChatLoaded(true);
   };
 
-  const asyncUnloadChat = async () => {
-    await props.chatInterface.unload();
-    setChatLoaded(false);
-  };
-
   /**
    * Run generate
    */
-  const asyncGenerate = async () => {
+  const asyncGenerate = async () => { 
     await asyncInitChat();
     setRequestInProgress(true);
-    const prompt = uiChatInput?.current.value;
+    const prompt = uiChatInput.current?.value;
     if (prompt == "" || typeof prompt == "undefined") {
       setRequestInProgress(false);
       return;
     }
-
-    appendMessage("right", prompt);
-    uiChatInput?.current.value = "";
-    uiChatInput?.current.setAttribute("placeholder", "Generating...");
+    
+    uiChatInput.current?.setAttribute("value", "");
+    uiChatInput.current?.setAttribute("placeholder", "Generating...");
+    appendMessage("right", prompt);    
 
     appendMessage("left", "Thinking...");
     const callbackUpdateResponse = (step, msg) => {
@@ -267,12 +245,11 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         let augmentedPrompt;
         if(prompt.includes("movie")) {
           augmentedPrompt = "You are a movie curator, and talks about movies.";
-        } else if (prompt.includes("carpets")) {
+        } else if (prompt.includes("carpet")) {
           augmentedPrompt = "You are a carpet conoisseur, and talks about carpets given information about samples.";
         } else {
           augmentedPrompt = "You are collector, and talks about your collection.";
         }
-        console.log(catalog);
         for (const item of catalog["response"]) {
           const url = item["image"];
           const text = item["id"];
@@ -294,9 +271,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           },
         ];
         const newPrompt = llamaV2Prompt(systemPrompt, messages);
-        console.log(`New prompt: ${newPrompt}`);
         appendMessage("left", "Thinking...");
-        const output = await props.chatInterface.generate(newPrompt, callbackUpdateResponse);
+        const output = await props.library.generateResponse(newPrompt, callbackUpdateResponse);
         updateLastMessage("left", output);
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
@@ -326,7 +302,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         console.log(conversations);
         let augmentedPrompt = "You are a chatterbox, who is fed questions and answers. Then uses it for reference in your conversation."
         let ct = 0;
-        for (const item of conversations["response"]) {
+        for (const item of conversations.response) {
           const question = item["question"];
           const answer = item["answer"];
           const text = `
@@ -353,14 +329,14 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           },
         ];
         const newPrompt = llamaV2Prompt(systemPrompt, messages);
-        const output = await props.chatInterface.generate(newPrompt, callbackUpdateResponse);
+        const output = await props.library.generateResponse(newPrompt, callbackUpdateResponse);
         updateLastMessage("left", output);
       }
-      uiChatInfoLabel.current.innerHTML = await props.chatInterface.runtimeStatsText();
+      uiChatInfoLabel.current.innerHTML = await props.library.runtimeStatsText();
     } catch (err) {
       appendMessage("error", "Generate error, " + err.toString());
       console.log(err.stack);
-      await asyncUnloadChat();
+      props.library.unload();
     }
     uiChatInput.current.setAttribute("placeholder", "Enter your message...");
     setRequestInProgress(false);

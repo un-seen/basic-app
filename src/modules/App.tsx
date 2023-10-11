@@ -4,24 +4,15 @@ import "../css/app.css";
 import "../css/bar.css";
 import "../css/landing.css";
 import { ChatUI } from "./adapter/chat";
-import { useAuthListener, UserContext } from "./Firebase";
-import { ChatInterface, ChatModule, ChatWorkerClient } from "@mlc-ai/web-llm";
-import meta from './adapter/meta'
+import { useAuthListener, UserContext } from "./firebase";
 import "regenerator-runtime";
-import WorkerFactory from "./adapter/factory";
-import Asset from "./Asset"
+import Asset from "./asset"
 import { SpaceUI } from "./adapter/space";
 import { Library } from "hedwigai";
-import config from "./Config";
+import config from "./config";
 
 const App = () => {
   
-  let chat: ChatInterface;
-  if (meta.use_web_worker) {
-    chat = useMemo(() =>  new ChatWorkerClient(WorkerFactory()), []);
-  } else {
-    chat = useMemo(() => new ChatModule(), []);
-  }
   const { user, userData } = useAuthListener();
   const [library, setLibrary] = React.useState<Library>();
   const [healthOk, setHealthOk] = React.useState(false);
@@ -121,7 +112,7 @@ const App = () => {
         </div>
         <div className="main">
           {
-            libraryReady && <ChatUI chatInterface={chat} deactive={user != null} library={library}/>
+            libraryReady && <ChatUI deactive={user != null} library={library}/>
           }
           {
             libraryReady && <SpaceUI library={library}/>
