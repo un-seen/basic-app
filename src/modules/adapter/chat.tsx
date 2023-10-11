@@ -16,7 +16,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   );
   
   const uiChat = React.useRef<HTMLDivElement>(null);
-  const uiChatInput = React.useRef<HTMLInputElement>(null);
+  const [uiChatInput, setUiChatInput] = React.useState<string>("");
   const uiChatInfoLabel = React.useRef<HTMLLabelElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
   
@@ -33,7 +33,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       console.log(file.name);
       if (typeof props.library === "undefined") return;
       props.library
-        .storeAsset(file)
+        .storeFile(file)
         .then((result) => {
           queueMessage("left", result["message"]);
         })
@@ -157,7 +157,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     if (kind == "init") {
       text = "[System Initalize] " + text;
     }
-    const matches = uiChat?.current.getElementsByClassName(`msg ${kind}-msg`);
+    const matches = uiChat.current?.getElementsByClassName(`msg ${kind}-msg`);
     if (typeof matches == "undefined" || matches?.length == 0)
       throw Error(`${kind} message do not exist`);
     const msg = matches[matches.length - 1];
@@ -217,14 +217,14 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const asyncGenerate = async () => { 
     await asyncInitChat();
     setRequestInProgress(true);
-    const prompt = uiChatInput.current?.value;
+    const prompt = uiChatInput;
+    console.log(`asyncGenerate called with prompt: ${prompt}`)
     if (prompt == "" || typeof prompt == "undefined") {
       setRequestInProgress(false);
       return;
     }
     
-    uiChatInput.current?.setAttribute("value", "");
-    uiChatInput.current?.setAttribute("placeholder", "Generating...");
+    setUiChatInput("")
     appendMessage("right", prompt);    
 
     appendMessage("left", "Thinking...");
@@ -244,9 +244,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         let ct = 0;
         let augmentedPrompt;
         if(prompt.includes("movie")) {
-          augmentedPrompt = "You are a movie curator, and talks about movies.";
+          augmentedPrompt = "You are a movie buff and likes telling about movies, nothing else.";
         } else if (prompt.includes("carpet")) {
-          augmentedPrompt = "You are a carpet conoisseur, and talks about carpets given information about samples.";
+          augmentedPrompt = "You are a carpet conoisseur, and talks about carpets given information about samples. Keep it short and sweet.";
         } else {
           augmentedPrompt = "You are collector, and talks about your collection.";
         }
@@ -267,7 +267,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         const messages: PromptData[] = [
           {
             role: "user",
-            content: "Tell me about the items in the sample catalog",
+            content: "Tell me about the items in the catalog",
           },
         ];
         const newPrompt = llamaV2Prompt(systemPrompt, messages);
@@ -338,7 +338,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       console.log(err.stack);
       props.library.unload();
     }
-    uiChatInput.current.setAttribute("placeholder", "Enter your message...");
     setRequestInProgress(false);
   };
 
@@ -355,7 +354,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           id="chatui-input"
           type="text"
           className="chatui-input"
-          ref={uiChatInput}
+          value={uiChatInput}
+          onChange={(e) => setUiChatInput(e.target.value)}
           placeholder="Enter your message..."
           onKeyDown={registerEnterKeyOnUIChatInput}
         />
