@@ -1,5 +1,6 @@
 export default {
-  HEDWIGAI_EMAIL: process.env.HEDWIGAI_EMAIL as string,
+  HEDWIGAI_SERVICE_TOKEN: process.env.HEDWIGAI_SERVICE_TOKEN as string,
+  HEDWIGAI_DEPLOYMENT: process.env.HEDWIGAI_DEPLOYMENT as string,
   HEDWIGAI_PASSWORD: process.env.HEDWIGAI_PASSWORD as string,
   HEDWIGAI_URL: process.env.HEDWIGAI_URL as string,
   FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,

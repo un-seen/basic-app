@@ -1,43 +1,32 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
 import "../css/landing.css";
-import { ChatUI } from "./adapter/chat";
-import { useAuthListener, UserContext } from "./firebase";
+import { ChatUI } from "./components/chat";
 import "regenerator-runtime";
 import Asset from "./asset"
-import { SpaceUI } from "./adapter/space";
+import { SpaceUI } from "./components/space";
 import { Library } from "hedwigai";
 import config from "./config";
 
 const App = () => {
   
-  const { user, userData } = useAuthListener();
+  const [email, setEmail] = React.useState("");
   const [library, setLibrary] = React.useState<Library>();
   const [healthOk, setHealthOk] = React.useState(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
-  const signInButton = React.useRef<HTMLButtonElement>(null);
-  const healthStatus = React.useRef<HTMLDivElement>(null);
-  const [email, setEmail] = React.useState<string>();
-  const [password, setPassword] = React.useState<string>();
+  const [signInText, setSignInText] = React.useState("Sign In");
+  const [healthStatus, setHealthStatus] = React.useState("Server ❌");;
   
   const signIn = () => {
     if (libraryReady) {
       document.getElementById("library-email")?.setAttribute("disabled", "false");
-      document.getElementById("library-password")?.setAttribute("disabled", "false");
       setLibraryReady(false);
-      if (signInButton.current != null) {
-        signInButton.current.textContent = "Sign In";  
-      };
+      setSignInText("Sign In");
     }
     setLibrary(
-      new Library({
-        email: email,
-        password: password,
-        url: config.HEDWIGAI_URL,
-        embedded: false
-      })
+      new Library({ deployment: config.HEDWIGAI_DEPLOYMENT, email: email, password: config.HEDWIGAI_PASSWORD, url: config.HEDWIGAI_URL })
     )
   };
 
@@ -45,26 +34,26 @@ const App = () => {
     if (typeof library == 'undefined') return;
     library.healthCheck().then((result) => {
       if (result["healthy"] === "yes") {
-        healthStatus.current.textContent = "Server ✅";
+        setHealthStatus("Server ✅");
         setInterval(() => {
-          if(library.isWorking()) {
-            healthStatus.current.textContent = "Server 🔥";
-          } else {
-            healthStatus.current.textContent = "Server ✅";
-          }
+          (async () => await library.isWorking().then((value) => {
+            if (value) {
+              setHealthStatus("Server 🔥")
+            } else {
+              setHealthStatus("Server ✅")
+            }
+          }))();
         }, 3000);
         setHealthOk(true)
       } else {
-        healthStatus.current.textContent =
-          "Server Disconnected ❌";
+        setHealthStatus("Server Disconnected ❌")
         setHealthOk(false)
       }
     })
     library.signIn().then((success: Boolean) => {
       if (success) {
         document.getElementById("library-email")?.setAttribute("disabled", "true");
-        document.getElementById("library-password")?.setAttribute("disabled", "true");
-        signInButton.current.textContent = "Sign Out";
+        setSignInText("Sign Out");
         setLibraryReady(true);
       }
     })
@@ -83,7 +72,6 @@ const App = () => {
         return;
       }
       console.log("Successfuly setup library");
-      window.library = library
     })
   }, [libraryReady])
 
@@ -102,20 +90,16 @@ const App = () => {
               <input id="library-email" type="text" onChange={(e) => setEmail(e.target.value)} />
             </label>
             <br />
-            <label>
-              Password:
-              <input id="library-password" type="password" onChange={(e) => setPassword(e.target.value)} />
-            </label>
-            <button id="sign-in" ref={signInButton} onClick={signIn}>Sign In</button>
-            <div id="server-health" ref={healthStatus}>Server ❌</div>
+            <button id="sign-in" onClick={signIn}>{signInText}</button>
+            <div id="server-health">{healthStatus}</div>
           </div>
         </div>
         <div className="main">
           {
-            libraryReady && <ChatUI deactive={user != null} library={library}/>
+            libraryReady && typeof library != 'undefined' && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
           }
           {
-            libraryReady && <SpaceUI library={library}/>
+            libraryReady && typeof library != 'undefined' && <SpaceUI library={library}/>
           }
           {
             !libraryReady && (<div className="landing">

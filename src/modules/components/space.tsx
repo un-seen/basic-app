@@ -1,9 +1,10 @@
-import { Library } from "hedwigai";
 import ForceGraph3D from '3d-force-graph';
 import React, { useEffect } from "react";
 import '../../css/space.css';
 import * as THREE from 'three';
-import SpriteText from 'three-spritetext';
+import { useAtom } from "jotai";
+import { Library } from "hedwigai";
+import { SIGNAL_RESET } from './store';
 
 interface SpaceProps {
     library: Library;
@@ -13,12 +14,14 @@ const SpaceUI: React.FC<SpaceProps> = (props: SpaceProps) => {
 
     const ref = React.createRef<HTMLDivElement>();
     const [graphData, setGraphData] = React.useState<any>({ nodes: [], links: [] });
+    const [resetSignal, setResetSignal] = useAtom<boolean>(SIGNAL_RESET);
 
     useEffect(() => {
+        if(!resetSignal) return;
         props.library.getGraph().then((graph) => {
             setGraphData(graph);
         })
-    }, [])
+    }, [resetSignal])
 
     useEffect(() => {
         if (ref.current == null) {

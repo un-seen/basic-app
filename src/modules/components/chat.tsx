@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import '../../css/chat.css';
-import { Library } from "hedwigai"
-import { PromptData, llamaV2Prompt } from "./prompter";
+import { Library, llamaV2Prompt, PromptData } from "hedwigai"
+import { useAtom } from "jotai";
+import { SIGNAL_RESET } from "./store";
 
 interface ChatProps {
   deactive: boolean;
@@ -9,6 +10,7 @@ interface ChatProps {
 }
 
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
+  const [resetSignal, setResetSignal] = useAtom<boolean>(SIGNAL_RESET);
   const [chatLoaded, setChatLoaded] = React.useState<boolean>(false);
   const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
   const [chatRequestChain, setChatRequestChain] = React.useState<Promise<void>>(
@@ -86,7 +88,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     // try reset after previous requests finishes
     pushTask(async () => {
       resetChatHistory();
-      console.log(`Initalizing chat`)
       await asyncInitChat();
     });
   }, []);
@@ -99,7 +100,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     // try reset after previous requests finishes
     pushTask(async () => {
       await props.library.resetGenerateResponse(async () => resetChatHistory());
-    });
+      await props.library.reset()
+      
+    })
   };
 
   // Internal helper functions
@@ -186,6 +189,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     if (uiChatInfoLabel.current !== null) {
       uiChatInfoLabel.current.innerHTML = "";
     }
+    console.log("reset chat history");
+    setResetSignal(true)
   };
 
   const asyncInitChat = async () => {
@@ -242,19 +247,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           `Here is the personalized catalog for your prompt.`,
         );
         let ct = 0;
-        let augmentedPrompt;
-        if(prompt.includes("movie")) {
-          augmentedPrompt = "You are a movie buff and likes telling about movies, nothing else.";
-        } else if (prompt.includes("carpet")) {
-          augmentedPrompt = "You are a carpet conoisseur, and talks about carpets given information about samples. Keep it short and sweet.";
-        } else {
-          augmentedPrompt = "You are collector, and talks about your collection.";
-        }
+        let program = catalog["system"] || "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
           const url = item["image"];
           const text = item["id"];
           appendMessage("left", text, url);
-          augmentedPrompt += `\n * ${item["caption"]}`;
+          program += `\n * ${item["caption"]}`;
           ct += 1;
           if (ct > 1) {
             break;
@@ -262,12 +260,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
         const systemPrompt: PromptData = {
           role: "system",
-          content: augmentedPrompt,
+          content: program,
         };
         const messages: PromptData[] = [
           {
             role: "user",
-            content: "Tell me about the items in the catalog",
+            content: "Tell me about the items in the catalog. Keep it succint.",
           },
         ];
         const newPrompt = llamaV2Prompt(systemPrompt, messages);
