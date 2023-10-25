@@ -4,11 +4,11 @@
     z-index: 1;
     overflow: hidden;
     display: flex;
-    height: 86.55vh;
     align-items: center;
     text-align: center;
     row-gap: 2rem;
     margin-top: 3rem;
+    padding-bottom: 0;
     flex-direction: column;
     overflow: hidden;
 }
@@ -29,7 +29,7 @@
 }
 
 .landing > img {
-    width: 30vw;
+    width: 30vh;
     object-fit: cover;
     z-index: -1;
     user-select: none;

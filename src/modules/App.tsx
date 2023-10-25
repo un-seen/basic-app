@@ -3,6 +3,7 @@ import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
 import "../css/landing.css";
+import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
 import "regenerator-runtime";
 import Asset from "./asset"
@@ -17,7 +18,7 @@ const App = () => {
   const [healthOk, setHealthOk] = React.useState(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
-  const [healthStatus, setHealthStatus] = React.useState("Server ❌");;
+  const [healthStatus, setHealthStatus] = React.useState("❌");;
   
   const signIn = () => {
     if (libraryReady) {
@@ -34,13 +35,13 @@ const App = () => {
     if (typeof library == 'undefined') return;
     library.healthCheck().then((result) => {
       if (result["healthy"] === "yes") {
-        setHealthStatus("Server ✅");
+        setHealthStatus("✅");
         setInterval(() => {
           (async () => await library.isWorking().then((value) => {
             if (value) {
-              setHealthStatus("Server 🔥")
+              setHealthStatus("🔥")
             } else {
-              setHealthStatus("Server ✅")
+              setHealthStatus("✅")
             }
           }))();
         }, 3000);
@@ -85,12 +86,11 @@ const App = () => {
             <img src={Asset.LANDING_LOGO} style={{"width": "2vw"}} alt="hedwigAI" />
           </div>
           <div className="controls">
-            <label>
-              Email:
-              <input id="library-email" type="text" onChange={(e) => setEmail(e.target.value)} />
-            </label>
-            <br />
-            <button id="sign-in" onClick={signIn}>{signInText}</button>
+          <input id="library-email" type="text" placeholder="Enter Account Email" onChange={(e) => setEmail(e.target.value)} />
+            <div id="sign-in" className="gbutton" onClick={signIn}>
+              
+              <span/><span/><span/>{signInText}
+            </div>
             <div id="server-health">{healthStatus}</div>
           </div>
         </div>
@@ -103,10 +103,10 @@ const App = () => {
           }
           {
             !libraryReady && (<div className="landing">
+                <br/>
                 <h1>hedwigAI </h1>
-                <br></br>
-                <h2>Your ai powered knowledge graph</h2>
-              <img src={Asset.LANDING_LOGO} alt="hedwigAI" />
+                <h2 style={{"fontFamily": "Roboto, sans-serif"}}>Your ai powered knowledge graph</h2>
+              <img src={Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "10vw"}} />
               </div>)
           }
         </div>

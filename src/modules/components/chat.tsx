@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import '../../css/chat.css';
 import { Library, llamaV2Prompt, PromptData } from "hedwigai"
-import { useAtom } from "jotai";
-import { SIGNAL_RESET } from "./store";
 
 interface ChatProps {
   deactive: boolean;
@@ -10,7 +8,6 @@ interface ChatProps {
 }
 
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
-  const [resetSignal, setResetSignal] = useAtom<boolean>(SIGNAL_RESET);
   const [chatLoaded, setChatLoaded] = React.useState<boolean>(false);
   const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
   const [chatRequestChain, setChatRequestChain] = React.useState<Promise<void>>(
@@ -72,6 +69,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   // the tasks previous tasks, which causes them to early stop
   // can be interrupted by chat.interruptGenerate
   const onGenerate = () => {
+    console.log(`onGenerate called`)
     if (requestInProgress) {
       return;
     }
@@ -174,7 +172,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     });
     msgText[0].innerHTML = "";
     list.forEach((item) => msgText[0].append(item));
-    uiChat?.current.scrollTo(0, uiChat?.current.scrollHeight);
+    uiChat.current.scrollTo(0, uiChat.current.scrollHeight);
   };
 
   const resetChatHistory = () => {
@@ -183,14 +181,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       // need to unpack to list so the iterator don't get affected by mutation
       const matches = [...uiChat.current.getElementsByClassName(`msg ${tag}-msg`)];
       for (const item of matches) {
-        uiChat?.current.removeChild(item);
+        uiChat.current.removeChild(item);
       }
     }
     if (uiChatInfoLabel.current !== null) {
       uiChatInfoLabel.current.innerHTML = "";
     }
-    console.log("reset chat history");
-    setResetSignal(true)
   };
 
   const asyncInitChat = async () => {
@@ -340,7 +336,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   };
 
   return (
-    <div className="chatui">
+    <div className="glass">
       <div
         className="chatui-chat"
         id="chatui-chat"
