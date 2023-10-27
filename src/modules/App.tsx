@@ -84,7 +84,7 @@ const App = () => {
     if(libraryReady) {
       document.getElementById("library-email")?.setAttribute("disabled", "true");
       setSignInText("Sign Out");    
-      library.setup().then((success: Boolean) => {
+      library.setup(email).then((success: Boolean) => {
         if(!success) {
           console.log("Failed to setup library");
           return;
