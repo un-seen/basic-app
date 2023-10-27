@@ -30,7 +30,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       queueMessage("left", "No file selected");
     } else {
       const file = fileInput.current.files[0] as File;
-      console.log(file.name);
       if (typeof props.library === "undefined") return;
       props.library
         .storeFile(file)
@@ -70,7 +69,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   // the tasks previous tasks, which causes them to early stop
   // can be interrupted by chat.interruptGenerate
   const onGenerate = () => {
-    console.log(`onGenerate called`)
     if (requestInProgress) {
       return;
     }
@@ -221,7 +219,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     await asyncInitChat();
     setRequestInProgress(true);
     const prompt = uiChatInput;
-    console.log(`asyncGenerate called with prompt: ${prompt}`)
     if (prompt == "" || typeof prompt == "undefined") {
       setRequestInProgress(false);
       return;
@@ -236,7 +233,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     };
 
     try {
-      console.log(`Requesting generate with prompt: ${prompt}`);
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
         const catalog = await props.library.getImage(prompt);
@@ -245,7 +241,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         let program = catalog["system"] || "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
           const url = item["image"];
-          const text = item["id"];
+          const text = item["caption"];
           appendMessage("left", text, url);
           program += `\n * ${item["caption"]}`;
           ct += 1;
