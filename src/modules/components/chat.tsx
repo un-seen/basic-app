@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import '../../css/chat.css';
-import { Library, llamaV2Prompt, PromptData } from "hedwigai"
+import { Library, PromptData } from "hedwigai"
+
 
 interface ChatProps {
   deactive: boolean;
@@ -81,7 +82,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   useEffect(() => {
     if (requestInProgress) {
       // interrupt previous generation if any
-      props.library.interruptGenerateResponse();
+      // props.library.interruptGenerateResponse();
     }
     // try reset after previous requests finishes
     pushTask(async () => {
@@ -93,13 +94,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const onReset = () => {
     if (requestInProgress) {
       // interrupt previous generation if any
-      props.library.interruptGenerateResponse();
+      // props.library.interruptGenerateResponse();
     }
     // try reset after previous requests finishes
     pushTask(async () => {
-      await props.library.resetGenerateResponse(async () => resetChatHistory());
+      // await props.library.resetGenerateResponse(async () => resetChatHistory());
       await props.library.reset()
-      
     })
   };
 
@@ -165,6 +165,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     const msgText = msg.getElementsByClassName("msg-text");
     if (msgText.length != 1) throw Error("Expect msg-text");
     if (msgText[0].innerHTML == text) return;
+    console.log(`updateLastMessage: ${text}`)
     const list: HTMLDivElement[] = text.split("\n").map((t: string) => {
       const item = document.createElement("div");
       item.textContent = t;
@@ -189,27 +190,28 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     }
   };
 
-  const asyncInitChat = async () => {
+  const asyncInitChat = async (): Promise<void> => {
     if (chatLoaded) {
       console.log("chat already loaded")
       return
     };
-    console.log(`asyncInitChat called`)
-    appendMessage("init", "");
     setRequestInProgress(true);
     try {
-      console.log(`loading library runtime`)
-      await props.library.reloadRuntime((report) => updateLastMessage("init", report.text));
-      console.log(`completed loading library runtime`)
+      const messages: PromptData[] = [{
+        "content": `Hi! I am here to chat to talk about the knowledge graph.`,
+        "role": "user"
+      }]
+      const result = await props.library.generateResponse(messages)
+      console.log(result)
+      appendMessage("left", result["response"])
+      appendMessage("left", "Please give a prompt with keyword \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
+      setRequestInProgress(false);
+      setChatLoaded(true);
     } catch (err) {
       appendMessage("error", "Init error, " + err.toString());
       console.log(err.stack);
-      await props.library.unloadRuntime();
       setRequestInProgress(false);
-      return;
     }
-    setRequestInProgress(false);
-    setChatLoaded(true);
   };
 
   /**
@@ -238,10 +240,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
         const catalog = await props.library.getImage(prompt);
-        updateLastMessage(
-          "left",
-          `Here is the personalized catalog for your prompt.`,
-        );
+        updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
         let program = catalog["system"] || "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
@@ -250,24 +249,10 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           appendMessage("left", text, url);
           program += `\n * ${item["caption"]}`;
           ct += 1;
-          if (ct > 1) {
+          if (ct > 4) {
             break;
           }
         }
-        const systemPrompt: PromptData = {
-          role: "system",
-          content: program,
-        };
-        const messages: PromptData[] = [
-          {
-            role: "user",
-            content: "Tell me about the items in the catalog. Keep it succint.",
-          },
-        ];
-        const newPrompt = llamaV2Prompt(systemPrompt, messages);
-        appendMessage("left", "Thinking...");
-        const output = await props.library.generateResponse(newPrompt, callbackUpdateResponse);
-        updateLastMessage("left", output);
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
         const frames = await props.library.seekVideo(prompt);
@@ -311,26 +296,12 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           }
         }
       } else {
-        let augmentedPrompt = "You are quiz master, and refers to given sample questions, answers and data.";
-        const systemPrompt: PromptData = {
-          role: "system",
-          content: augmentedPrompt,
-        };
-        const messages: PromptData[] = [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ];
-        const newPrompt = llamaV2Prompt(systemPrompt, messages);
-        const output = await props.library.generateResponse(newPrompt, callbackUpdateResponse);
-        updateLastMessage("left", output);
+        appendMessage("left", "Please give a prompt with \n [1] catalog for images \n  [2] seek for videos \n  [3] ? for conversation");
       }
       uiChatInfoLabel.current.innerHTML = await props.library.runtimeStatsText();
     } catch (err) {
       appendMessage("error", "Generate error, " + err.toString());
       console.log(err.stack);
-      props.library.unload();
     }
     setRequestInProgress(false);
   };

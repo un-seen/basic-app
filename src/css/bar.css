@@ -14,7 +14,7 @@
 
 #title {
     text-align: center;
-    color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
 }
 
 .controls {
@@ -27,4 +27,7 @@
 
 #library-email {
     font-family: 'Roboto', sans-serif;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    padding-left: 0.5rem;
 }

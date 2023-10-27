@@ -23,7 +23,7 @@
     "3d-force-graph": "^1.72.3",
     "buffer": "^5.7.1",
     "firebase": "^8.10.0",
-    "hedwigai": "file:../hedwigai-js",
+    "hedwigai": "0.1.31",
     "jotai": "^2.4.3",
     "numeric": "^1.2.6",
     "pdfjs": "^2.4.7",

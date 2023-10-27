@@ -6,33 +6,52 @@ import "../css/landing.css";
 import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
 import "regenerator-runtime";
-import Asset from "./asset"
+import Asset from "./Asset"
 import { SpaceUI } from "./components/space";
 import { Library } from "hedwigai";
-import config from "./config";
+import config from "./Config";
+import { useAtom } from "jotai";
+import { idTokenAtom, idEmailAtom } from "./store";
 
 const App = () => {
   
-  const [email, setEmail] = React.useState("");
+  const [email, setEmail] = React.useState<string>("");
+  const [savedEmail, setSavedEmail] = useAtom<string>(idEmailAtom);
   const [library, setLibrary] = React.useState<Library>();
+  const [idToken, setIdToken] = useAtom<string>(idTokenAtom);
   const [healthOk, setHealthOk] = React.useState(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
   const [healthStatus, setHealthStatus] = React.useState("❌");;
   
-  const signIn = () => {
-    if (libraryReady) {
-      document.getElementById("library-email")?.setAttribute("disabled", "false");
-      setLibraryReady(false);
-      setSignInText("Sign In");
-    }
+  useEffect(() => {
     setLibrary(
-      new Library({ deployment: config.HEDWIGAI_DEPLOYMENT, email: email, password: config.HEDWIGAI_PASSWORD, url: config.HEDWIGAI_URL })
+      new Library({ deployment: config.HEDWIGAI_DEPLOYMENT, url: config.HEDWIGAI_URL })
     )
+  }, [])
+
+  
+  const signIn = () => {
+    if (typeof library == 'undefined' || libraryReady) {
+      document.getElementById("library-email")?.removeAttribute("disabled");
+      setEmail("");
+      setSavedEmail("");
+      setIdToken("");
+      setSignInText("Sign In");
+      setLibraryReady(false);
+    } else {
+      library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
+        if(success) {
+          setSavedEmail(email);
+          setIdToken(library.getIdToken());
+          setLibraryReady(true)
+        }
+      })
+    }
   };
 
   useEffect(() => {
-    if (typeof library == 'undefined') return;
+    if (typeof library == 'undefined') return
     library.healthCheck().then((result) => {
       if (result["healthy"] === "yes") {
         setHealthStatus("✅");
@@ -51,44 +70,48 @@ const App = () => {
         setHealthOk(false)
       }
     })
-    library.signIn().then((success: Boolean) => {
-      if (success) {
-        document.getElementById("library-email")?.setAttribute("disabled", "true");
-        setSignInText("Sign Out");
-        setLibraryReady(true);
-      }
-    })
+    if(idToken.length > 0) {
+      console.log("Signing in with saved token");
+      console.log(`saved email: ${savedEmail}`);
+      library.setIdToken(idToken)
+      setEmail(savedEmail);
+      setLibraryReady(true);
+    }
   }, [library])
 
   useEffect(() => {
-    if(healthOk && typeof library != 'undefined') {
-      console.log(`Health is OK for Library[embedded=${library.isEmbedded()}]`)
+    if (typeof library == 'undefined') return;
+    if(libraryReady) {
+      document.getElementById("library-email")?.setAttribute("disabled", "true");
+      setSignInText("Sign Out");    
+      library.setup().then((success: Boolean) => {
+        if(!success) {
+          console.log("Failed to setup library");
+          return;
+        }
+        console.log("Successfuly setup library");
+      })
     }
-  }, [healthOk])
-  useEffect(() => {
-    if (typeof library == 'undefined' || !libraryReady) return;
-    library.setup().then((success: Boolean) => {
-      if(!success) {
-        console.log("Failed to setup library");
-        return;
-      }
-      console.log("Successfuly setup library");
-    })
   }, [libraryReady])
+
+  const registerEnterKeyOnEmail = (event) => {
+    if (event.keyCode === 13) {
+      signIn();
+    }
+  };
 
   return (
     <div className="app">
         <div className="bar">
-          <div id="logo">
+          <div id="logo" style={{"paddingTop": "0.5rem"}}>
+          <img src={Asset.LANDING_LOGO} style={{"width": "2rem"}} alt="hedwigAI" />
             <div id="title">
                   hedwigAI
             </div>
-            <img src={Asset.LANDING_LOGO} style={{"width": "2vw"}} alt="hedwigAI" />
           </div>
           <div className="controls">
-          <input id="library-email" type="text" placeholder="Enter Account Email" onChange={(e) => setEmail(e.target.value)} />
+          <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
             <div id="sign-in" className="gbutton" onClick={signIn}>
-              
               <span/><span/><span/>{signInText}
             </div>
             <div id="server-health">{healthStatus}</div>
@@ -106,7 +129,7 @@ const App = () => {
                 <br/>
                 <h1>hedwigAI </h1>
                 <h2 style={{"fontFamily": "Roboto, sans-serif"}}>Your ai powered knowledge graph</h2>
-              <img src={Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "10vw"}} />
+              <img src={Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "5rem"}} />
               </div>)
           }
         </div>
