@@ -235,7 +235,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     try {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const catalog = await props.library.getImage(prompt);
+        const catalog = await props.library.findImage(prompt);
         updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
         let program = catalog["system"] || "You are given information about items and you talk about those.";
@@ -273,7 +273,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
       } else if (prompt.includes("?") && typeof props.library !== "undefined") {
         updateLastMessage("left", "Searching library...");
-        const conversations = await props.library.getConversation(prompt.replaceAll("?", ""));
+        const conversations = await props.library.findConversation(prompt.replaceAll("?", ""));
         console.log(conversations);
         let augmentedPrompt = "You are a chatterbox, who is fed questions and answers. Then uses it for reference in your conversation."
         let ct = 0;
