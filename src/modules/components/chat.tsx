@@ -32,18 +32,10 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       const file = fileInput.current.files[0] as File;
       if (typeof props.library === "undefined") return;
       props.library
-        .storeFile(file)
+        .indexFile(file)
         .then((result) => {
           queueMessage("left", result["message"]);
         })
-        .then(() => {
-          props.library.listAsset().then((res) => {
-            queueMessage(
-              "left",
-              `Here are the files in your library: \n *${res.join("\n * ")}`,
-            );
-          });
-        });
     }
   };
 

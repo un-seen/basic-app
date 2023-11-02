@@ -5,6 +5,7 @@ import "../css/bar.css";
 import "../css/landing.css";
 import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
+import { AtlasUI } from "./components/atlas";
 import "regenerator-runtime";
 import Asset from "./Asset"
 import { SpaceUI } from "./components/space";
@@ -31,25 +32,6 @@ const App = () => {
   }, [])
 
   
-  const signIn = () => {
-    if (typeof library == 'undefined' || libraryReady) {
-      document.getElementById("library-email")?.removeAttribute("disabled");
-      setEmail("");
-      setSavedEmail("");
-      setIdToken("");
-      setSignInText("Sign In");
-      setLibraryReady(false);
-    } else {
-      library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
-        if(success) {
-          setSavedEmail(email);
-          setIdToken(library.getIdToken());
-          setLibraryReady(true)
-        }
-      })
-    }
-  };
-
   useEffect(() => {
     if (typeof library == 'undefined') return
     library.healthCheck().then((result) => {
@@ -79,6 +61,25 @@ const App = () => {
     }
   }, [library])
 
+  const signIn = () => {
+    if (typeof library == 'undefined' || libraryReady) {
+      document.getElementById("library-email")?.removeAttribute("disabled");
+      setEmail("");
+      setSavedEmail("");
+      setIdToken("");
+      setSignInText("Sign In");
+      setLibraryReady(false);
+    } else {
+      library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
+        if(success) {
+          setSavedEmail(email);
+          setIdToken(library.getIdToken());
+          setLibraryReady(true)
+        }
+      })
+    }
+  };
+  
   useEffect(() => {
     if (typeof library == 'undefined') return;
     if(libraryReady) {
@@ -121,8 +122,11 @@ const App = () => {
           {
             libraryReady && typeof library != 'undefined' && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
           }
-          {
+          {/* {
             libraryReady && typeof library != 'undefined' && <SpaceUI library={library}/>
+          } */}
+          {
+            libraryReady && typeof library != 'undefined' && <AtlasUI library={library}/>
           }
           {
             !libraryReady && (<div className="landing">
