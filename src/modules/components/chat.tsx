@@ -155,7 +155,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     const msgText = msg.getElementsByClassName("msg-text");
     if (msgText.length != 1) throw Error("Expect msg-text");
     if (msgText[0].innerHTML == text) return;
-    console.log(`updateLastMessage: ${text}`)
     const list: HTMLDivElement[] = text.split("\n").map((t: string) => {
       const item = document.createElement("div");
       item.textContent = t;
@@ -182,7 +181,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
 
   const asyncInitChat = async (): Promise<void> => {
     if (chatLoaded) {
-      console.log("chat already loaded")
       return
     };
     setRequestInProgress(true);
@@ -192,7 +190,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         "role": "user"
       }]
       const result = await props.library.generateResponse(messages)
-      console.log(result)
       appendMessage("left", result["response"])
       appendMessage("left", "Please give a prompt with keyword \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
       setRequestInProgress(false);
@@ -219,14 +216,9 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     setUiChatInput("")
     appendMessage("right", prompt);    
 
-    appendMessage("left", "Thinking...");
-    const callbackUpdateResponse = (step, msg) => {
-      updateLastMessage("left", msg);
-    };
-
     try {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
-        updateLastMessage("left", "Searching library...");
+        appendMessage("left", "Searching library...");
         const catalog = await props.library.findImage(prompt);
         updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
@@ -242,7 +234,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           }
         }
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
-        updateLastMessage("left", "Searching library...");
+        appendMessage("left", "Searching library...");
         const frames = await props.library.seekVideo(prompt);
         updateLastMessage(
           "left",
@@ -264,9 +256,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           }
         }
       } else if (prompt.includes("?") && typeof props.library !== "undefined") {
-        updateLastMessage("left", "Searching library...");
+        appendMessage("left", "Searching library...");
         const conversations = await props.library.findConversation(prompt.replaceAll("?", ""));
-        console.log(conversations);
         let augmentedPrompt = "You are a chatterbox, who is fed questions and answers. Then uses it for reference in your conversation."
         let ct = 0;
         for (const item of conversations.response) {
@@ -274,8 +265,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           const answer = item["answer"];
           const text = `
           question: ${question}
-          answer: ${answer}
-          `
+          answer: ${answer}`
           appendMessage("left", text);
           augmentedPrompt += `\n * ${text}`;
           ct += 1;
@@ -284,6 +274,13 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           }
         }
       } else {
+        appendMessage("left", "Thinking...")
+        const messages: PromptData[] = [{
+          "content": prompt,
+          "role": "user"
+        }]
+        const result = await props.library.generateResponse(messages)
+        updateLastMessage("left", result["response"])
         appendMessage("left", "Please give a prompt with \n [1] catalog for images \n  [2] seek for videos \n  [3] ? for conversation");
       }
       uiChatInfoLabel.current.innerHTML = await props.library.runtimeStatsText();

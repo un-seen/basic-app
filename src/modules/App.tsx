@@ -8,11 +8,10 @@ import { ChatUI } from "./components/chat";
 import { AtlasUI } from "./components/atlas";
 import "regenerator-runtime";
 import Asset from "./Asset"
-import { SpaceUI } from "./components/space";
 import { Library } from "hedwigai";
 import config from "./Config";
 import { useAtom } from "jotai";
-import { idTokenAtom, idEmailAtom } from "./store";
+import { idTokenAtom, idEmailAtom } from "./Store";
 
 const App = () => {
   
@@ -20,7 +19,7 @@ const App = () => {
   const [savedEmail, setSavedEmail] = useAtom<string>(idEmailAtom);
   const [library, setLibrary] = React.useState<Library>();
   const [idToken, setIdToken] = useAtom<string>(idTokenAtom);
-  const [healthOk, setHealthOk] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
   const [healthStatus, setHealthStatus] = React.useState("❌");;
@@ -31,7 +30,6 @@ const App = () => {
     )
   }, [])
 
-  
   useEffect(() => {
     if (typeof library == 'undefined') return
     library.healthCheck().then((result) => {
@@ -45,16 +43,14 @@ const App = () => {
               setHealthStatus("✅")
             }
           }))();
-        }, 3000);
-        setHealthOk(true)
+        }, 1000);
+        setLoading(true)
       } else {
         setHealthStatus("Server Disconnected ❌")
-        setHealthOk(false)
+        setLoading(false)
       }
     })
     if(idToken.length > 0) {
-      console.log("Signing in with saved token");
-      console.log(`saved email: ${savedEmail}`);
       library.setIdToken(idToken)
       setEmail(savedEmail);
       setLibraryReady(true);
@@ -70,11 +66,13 @@ const App = () => {
       setSignInText("Sign In");
       setLibraryReady(false);
     } else {
+      setLoading(true)
       library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
         if(success) {
           setSavedEmail(email);
           setIdToken(library.getIdToken());
           setLibraryReady(true)
+          setLoading(false)
         }
       })
     }
@@ -90,7 +88,6 @@ const App = () => {
           console.log("Failed to setup library");
           return;
         }
-        console.log("Successfuly setup library");
       })
     }
   }, [libraryReady])
