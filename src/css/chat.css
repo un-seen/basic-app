@@ -150,7 +150,7 @@
 .circular-image {
   width: 150px; /* Set the desired width and height for the circular image */
   height: 150px;
-  border-radius: 50%; /* Create a circular clipping mask */
+  border-radius: 30%; /* Create a circular clipping mask */
   overflow: hidden; /* Hide any image overflow outside the circle */
   border-color: black;
   user-select: none;
