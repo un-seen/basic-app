@@ -8,6 +8,27 @@ interface ChatProps {
   library: Library;
 }
 
+function getRandomEmoji(): string {
+  const emojis = [
+    "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",
+    "🙂", "🙃", "😉", "😎", "🤩", "😍", "😘", "😗", "😙", "😚",
+    "☺️", "🤗", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣",
+    "😥", "😮", "🤐", "😯", "😪", "😫", "😴", "😌", "😛", "😜",
+    "😝", "🤤", "😒", "😓", "😔", "😕", "🙁", "😖", "😞", "😟",
+    "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", "😬", "😰",
+    "😱", "🥵", "🥶", "😳", "🤪", "😵", "😡", "😠", "🤬", "😷",
+    "🤒", "🤕", "🤢", "🤮", "🤧", "😇", "🤠", "🤡", "🥳", "🥴",
+    "🥺", "🤥", "🤫", "🤭", "🧐", "🤓", "😈", "👿", "👹", "👺",
+    "💀", "👻", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻",
+    "😼", "😽", "🙀", "😿", "😾", "👶", "👦", "👧", "👨", "👩",
+    "👴", "👵", "👮", "👷", "💂", "🕵️", "👯", "💃", "🕺", "👫",
+    "👬", "👭", "💏", "💑", "👪", "👤", "👥"
+  ];
+
+  const randomIndex = Math.floor(Math.random() * emojis.length);
+  return emojis[randomIndex];
+}
+
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [chatLoaded, setChatLoaded] = React.useState<boolean>(false);
   const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
@@ -220,12 +241,21 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         appendMessage("left", "Searching library...");
         const catalog = await props.library.findImage(prompt);
+        catalog['response'] = JSON.parse(catalog['response']);
         updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
         let program = catalog["system"] || "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
           const url = item["image"];
-          const text = item["caption"];
+          let text = "";
+          for (const key in item) {
+            if (['image', 'caption', 'dist'].includes(key)) continue;
+            if (key == 'id') {
+              text += `This file has name ${item[key]} <br/>`
+            } else {
+              text += `➕ ${key} => ${item[key]} <br/>`;
+            }
+          }
           appendMessage("left", text, url);
           program += `\n * ${item["caption"]}`;
           ct += 1;
