@@ -32,7 +32,7 @@
   justify-content: space-between;
   padding: 10px;
   border-bottom: 2px solid #ddd;
-  color: #666;
+  color: #ffffff;
 }
 
 .chatui-chat {
@@ -107,6 +107,7 @@
   color: white;
   text-align: center;
   padding-bottom: 0.3rem;
+  
 }
 
 .chatui-inputarea {
@@ -126,8 +127,8 @@
 
 .chatui-input {
   flex: 1;
-  background: #ddd;
-  border-color: #594b31;
+  background: inherit;
+  color: white;
   font-family: 'Saira Semi Condensed', sans-serif;
 }
 
