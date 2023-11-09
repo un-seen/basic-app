@@ -33,12 +33,6 @@
   background-color: transparent;
 }
 
-@media (max-width: 850px) {
-  .main {
-    flex-direction: column;
-  }
-}
-
 #library-email:focus {
   outline-style: solid;
   outline-color: rgb(229, 255, 0);

@@ -75,7 +75,7 @@
   padding: 15px;
   border-radius: 15px;
   color: rgb(0, 0, 0);
-  background: #ffffff;
+  background: #6cc3c5;
   filter: contrast(1px) blur(1px);
 }
 
@@ -126,9 +126,9 @@
 }
 
 .chatui-input {
-  flex: 1;
   background: inherit;
   color: white;
+  width: 100%;
   font-family: 'Saira Semi Condensed', sans-serif;
 }
 

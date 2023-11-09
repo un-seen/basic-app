@@ -22,3 +22,9 @@
       text-shadow: 0 0 2px #fff, 0 0 5px #acff4d, 0 0 10px #acff4d, 0 0 20px #f3ff4d;
     }
   }
+
+  @media (max-width: 850px) {
+    .spaceui {
+      display: hidden;
+    }
+  }
