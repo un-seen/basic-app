@@ -1,0 +1,24 @@
+.spaceui {
+    position: relative;
+    width: 50vw;
+    height: 80vh;
+    overflow: hidden;
+}
+
+.scene-tooltip {
+    font-size: 3rem;
+    text-align: center;
+    color: lime;  
+    font-family: 'VT323';
+    overflow-wrap: break-word;
+    max-width: 15rem;
+  }
+  
+  @-webkit-keyframes glow {
+    from {
+      text-shadow: 0 0 2px #fff, 0 0 5px #b4e600, 0 0 10px #96e600, 0 0 20px #cbe600;
+    }
+    to {
+      text-shadow: 0 0 2px #fff, 0 0 5px #acff4d, 0 0 10px #acff4d, 0 0 20px #f3ff4d;
+    }
+  }

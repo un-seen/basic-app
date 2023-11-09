@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
+import "../css/button.scss";
+import "../css/stars.scss";
 import "../css/landing.css";
 import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
@@ -101,21 +103,30 @@ const App = () => {
   return (
     <div className="app">
         <div className="bar">
-          <div id="logo" style={{"paddingTop": "0.5rem"}}>
-          <img src={Asset.LANDING_LOGO} style={{"width": "2rem"}} alt="hedwigAI" />
-            <div id="title">
-                  hedwigAI
+          <div id="logo" style={{"paddingTop": "0.5rem", display: libraryReady ? "flex" : "none"}}>
+            <img src={Asset.LANDING_LOGO} style={{"width": "2rem"}} alt="hedwigAI" />
+              <div id="title">
+                    hedwigAI
+              </div>
+          </div>
+          <div className="controls" style={{display: libraryReady ? "flex" : "none"}}>
+            <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
+            <div className="btn-star" style={{"width": "4rem", "textAlign": "center"}}onClick={signIn}>
+                <span className="top_left"></span>
+                <span className="top_right"></span>
+                <span className="title">
+                  {signInText}
+                </span>
+                <span className="bottom_right"></span>
+                <span className="bottom_left"></span>
+              </div>
+              <div id="server-health">{healthStatus}</div>
             </div>
           </div>
-          <div className="controls">
-          <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
-            <div id="sign-in" className="gbutton" onClick={signIn}>
-              <span/><span/><span/>{signInText}
-            </div>
-            <div id="server-health">{healthStatus}</div>
-          </div>
-        </div>
         <div className="main">
+          <div id="stars1"></div>
+          <div id="stars2"></div>
+          <div id="stars3"></div>
           {
             libraryReady && typeof library != 'undefined' && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
           }
@@ -129,8 +140,22 @@ const App = () => {
             !libraryReady && (<div className="landing">
                 <br/>
                 <h1>hedwigAI </h1>
-                <h2 style={{"fontFamily": "Roboto, sans-serif"}}>Your ai powered knowledge graph</h2>
-              <img src={Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "5rem"}} />
+                <h2>Your ai powered knowledge graph</h2>
+                <img src={libraryReady ? "" : Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "5rem"}} />
+                <div className="controls" style={{display: !libraryReady ? "flex" : "none", columnGap: "0.8rem"}}>
+                    <input id="library-email" style={{"color": "black"}} type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)}>
+                    </input>
+                    <div className="btn-star" style={{"width": "3rem"}}onClick={signIn}>
+                      <span className="top_left"></span>
+                      <span className="top_right"></span>
+                      <span className="title">
+                        {signInText}
+                      </span>
+                      <span className="bottom_right"></span>
+                      <span className="bottom_left"></span>
+                    </div>
+                </div>
+                <div id="server-health">Serverless {healthStatus}</div>
               </div>)
           }
         </div>

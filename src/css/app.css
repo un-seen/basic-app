@@ -17,15 +17,18 @@
 .bar {
   display: flex;
   flex-direction: row;
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #191F24 100%);
   justify-content: space-between;
   align-items: center;
   align-content: center;
+  padding-top: 0.5rem;
   height: 5%;
 }
 
 .main {
   display: flex;
   flex-direction: row;
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #191F24 100%);
   height: 95%;
   background-color: transparent;
 }
