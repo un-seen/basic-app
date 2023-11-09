@@ -109,7 +109,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     }
     // try reset after previous requests finishes
     pushTask(async () => {
-      // await props.library.resetGenerateResponse(async () => resetChatHistory());
+      resetChatHistory();
       await props.library.reset()
     })
   };
