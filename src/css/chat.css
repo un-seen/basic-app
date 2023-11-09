@@ -132,9 +132,13 @@
   font-family: 'Saira Semi Condensed', sans-serif;
 }
 
+.chatui-input:focus {
+  outline-color: #2f9799;
+}
+
 .chatui-btn {
   margin-left: 10px;
-  background: #ececec;
+  background: #ffffff;
   border-radius: 0.4rem;
   width: 5rem;
   cursor: pointer;
@@ -142,20 +146,21 @@
 }
 
 .chatui-btn:hover {
-  background: #ffffff;
+  background: #f0eaea;
 }
 
 .chatui-send-btn {
   margin-left: 10px;
-  background:  #ececec;
-  color:rgb(0, 0, 0)f;
+  background:  #6cc3c5;
+  opacity: 1.0;
+  color:rgb(255, 255, 255)f;
   font-weight: bold;
   font-family: 'Saira Semi Condensed', sans-serif;
   cursor: pointer;
 }
 
 .chatui-send-btn:hover {
-  background: #ffffff;
+  background: #2f9799;
 }
 
 .chatui-chat {
