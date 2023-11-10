@@ -59,8 +59,8 @@ const App = () => {
   }, [library])
 
   const interactWithSignButton = () => {
-    setSigning(true);
     if (typeof library == 'undefined' || libraryReady) {
+      setSigning(false);
       document.getElementById("library-email")?.removeAttribute("disabled");
       setEmail("");
       setSavedEmail("");
@@ -68,14 +68,14 @@ const App = () => {
       setSignInText("Sign In");
       setLibraryReady(false);
     } else {
+      setSigning(true);
       library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
         if(success) {
           setSavedEmail(email);
           setIdToken(library.getIdToken());
           setLibraryReady(true)
-        } else {
-          setSigning(false);
         }
+        setSigning(false)
       })
     }
   };
