@@ -4,6 +4,7 @@ import "../css/app.css";
 import "../css/bar.css";
 import "../css/button.scss";
 import "../css/stars.scss";
+import "../css/signing.css";
 import "../css/landing.css";
 import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
@@ -21,7 +22,7 @@ const App = () => {
   const [savedEmail, setSavedEmail] = useAtom<string>(idEmailAtom);
   const [library, setLibrary] = React.useState<Library>();
   const [idToken, setIdToken] = useAtom<string>(idTokenAtom);
-  const [loading, setLoading] = React.useState(false);
+  const [signing, setSigning] = React.useState<boolean>(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
   const [healthStatus, setHealthStatus] = React.useState("❌");;
@@ -46,10 +47,8 @@ const App = () => {
             }
           }))();
         }, 1000);
-        setLoading(true)
       } else {
         setHealthStatus("Server Disconnected ❌")
-        setLoading(false)
       }
     })
     if(idToken.length > 0) {
@@ -59,7 +58,8 @@ const App = () => {
     }
   }, [library])
 
-  const signIn = () => {
+  const interactWithSignButton = () => {
+    setSigning(true);
     if (typeof library == 'undefined' || libraryReady) {
       document.getElementById("library-email")?.removeAttribute("disabled");
       setEmail("");
@@ -68,13 +68,13 @@ const App = () => {
       setSignInText("Sign In");
       setLibraryReady(false);
     } else {
-      setLoading(true)
       library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
         if(success) {
           setSavedEmail(email);
           setIdToken(library.getIdToken());
           setLibraryReady(true)
-          setLoading(false)
+        } else {
+          setSigning(false);
         }
       })
     }
@@ -87,7 +87,6 @@ const App = () => {
       setSignInText("Sign Out");    
       library.setup(email).then((success: Boolean) => {
         if(!success) {
-          console.log("Failed to setup library");
           return;
         }
       })
@@ -96,7 +95,7 @@ const App = () => {
 
   const registerEnterKeyOnEmail = (event) => {
     if (event.keyCode === 13) {
-      signIn();
+      interactWithSignButton();
     }
   };
 
@@ -111,7 +110,7 @@ const App = () => {
           </div>
           <div className="controls" style={{display: libraryReady ? "flex" : "none"}}>
             <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
-            <div className="btn-star" style={{"width": "4rem", "textAlign": "center"}}onClick={signIn}>
+            <div className='btn-star' style={{"width": "4rem", "textAlign": "center"}} onClick={interactWithSignButton}>
                 <span className="top_left"></span>
                 <span className="top_right"></span>
                 <span className="title">
@@ -142,17 +141,18 @@ const App = () => {
                 <h1>hedwigAI </h1>
                 <h2>Your ai powered knowledge graph</h2>
                 <img src={libraryReady ? "" : Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "5rem"}} />
-                <div className="controls" style={{display: !libraryReady ? "flex" : "none", columnGap: "0.8rem"}}>
+                <div className='controls' style={{display: !libraryReady ? "flex" : "none", columnGap: "0.8rem"}}>
                     <input id="library-email" style={{"color": "black"}} type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)}>
                     </input>
-                    <div className="btn-star" style={{"width": "3rem"}}onClick={signIn}>
+                    <div className={`btn-star ${signing ? "active" : ""}`} style={{"width": "3rem"}} onClick={interactWithSignButton}>
                       <span className="top_left"></span>
                       <span className="top_right"></span>
-                      <span className="title">
+                      <span className={`title ${signing ? "hide" : ""}`}>
                         {signInText}
                       </span>
                       <span className="bottom_right"></span>
                       <span className="bottom_left"></span>
+                      <span className={`${signing ? "rotate-span" : "hide"}`}><i className="fa fa-refresh"></i></span>
                     </div>
                 </div>
                 <div id="server-health">Serverless {healthStatus}</div>
