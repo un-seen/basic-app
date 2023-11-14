@@ -4,6 +4,7 @@ import "../css/app.css";
 import "../css/bar.css";
 import "../css/button.scss";
 import "../css/stars.scss";
+import "../css/switch.scss";
 import "../css/signing.css";
 import "../css/landing.css";
 import "../css/glass-button.css";
@@ -11,16 +12,23 @@ import { ChatUI } from "./components/chat";
 import { AtlasUI } from "./components/atlas";
 import "regenerator-runtime";
 import Asset from "./Asset"
-import { Library } from "hedwigai";
+import { SearchUI } from "./components/search";
 import config from "./Config";
 import { useAtom } from "jotai";
+import { Library } from "hedwigai";
 import { idTokenAtom, idEmailAtom } from "./Store";
+
+enum Pane {
+  CHAT,
+  SEARCH
+}
 
 const App = () => {
   
   const [email, setEmail] = React.useState<string>("");
   const [savedEmail, setSavedEmail] = useAtom<string>(idEmailAtom);
   const [library, setLibrary] = React.useState<Library>();
+  const [pane, setPane] = React.useState<Pane>(Pane.CHAT);
   const [idToken, setIdToken] = useAtom<string>(idTokenAtom);
   const [signing, setSigning] = React.useState<boolean>(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
@@ -59,6 +67,7 @@ const App = () => {
   }, [library])
 
   const interactWithSignButton = () => {
+    if(signing) return;
     if (typeof library == 'undefined' || libraryReady) {
       setSigning(false);
       document.getElementById("library-email")?.removeAttribute("disabled");
@@ -99,6 +108,16 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    const element = document.querySelector('.active')
+    if (typeof element == 'undefined' || element == null) return;
+    if (pane == Pane.SEARCH) {
+      element.style.left = '50%';
+    } else {
+      element.style.left = '0%';
+    }
+  }, [pane])
+
   return (
     <div className="app">
         <div className="bar">
@@ -108,6 +127,19 @@ const App = () => {
                     hedwigAI
               </div>
           </div>
+          {
+            libraryReady && typeof library != 'undefined' && (
+              <div className="switch-button">
+                <span className="active"></span>
+                <button className={`switch-button-case ${pane == Pane.CHAT ? "active-case" : "inactive-case"}`} onClick={() => setPane(Pane.CHAT)}>
+                    Chat
+                </button>
+                <button className={`switch-button-case ${pane == Pane.SEARCH ? "active-case right" : "inactive-case"}`}  onClick={() =>  setPane(Pane.SEARCH)}>
+                  Search
+                </button>
+              </div>
+            )
+          }
           <div className="controls" style={{display: libraryReady ? "flex" : "none"}}>
             <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
             <div className='btn-star' style={{"width": "4rem", "textAlign": "center"}} onClick={interactWithSignButton}>
@@ -123,17 +155,20 @@ const App = () => {
             </div>
           </div>
         <div className="main">
-          <div id="stars1"></div>
-          <div id="stars2"></div>
-          <div id="stars3"></div>
+          <div className="stars">
+            <div id="stars1"></div>
+            <div id="stars2"></div>
+            <div id="stars3"></div>
+          </div>
+          
           {
-            libraryReady && typeof library != 'undefined' && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
+            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
           }
-          {/* {
-            libraryReady && typeof library != 'undefined' && <SpaceUI library={library}/>
-          } */}
           {
-            libraryReady && typeof library != 'undefined' && <AtlasUI library={library}/>
+            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <AtlasUI library={library}/>
+          }
+          {
+            libraryReady && typeof library != 'undefined' && pane==Pane.SEARCH && <SearchUI library={library}/>
           }
           {
             !libraryReady && (<div className="landing">

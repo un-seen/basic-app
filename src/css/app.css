@@ -14,6 +14,7 @@
   padding-right: 1rem;
   user-select: none;
 }
+
 .bar {
   display: flex;
   flex-direction: row;
@@ -22,14 +23,15 @@
   align-items: center;
   align-content: center;
   padding-top: 0.5rem;
-  height: 5%;
+  justify-self: center;
+  height:3%;
 }
 
 .main {
   display: flex;
   flex-direction: row;
   background: radial-gradient(ellipse at bottom, #1B2735 0%, #191F24 100%);
-  height: 95%;
+  height: 96%;
   background-color: transparent;
 }
 

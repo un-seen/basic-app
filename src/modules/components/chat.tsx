@@ -244,7 +244,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         catalog['response'] = JSON.parse(catalog['response']);
         updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
-        let program = catalog["system"] || "You are given information about items and you talk about those.";
+        let program = "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
           const url = item["image"];
           let text = "";

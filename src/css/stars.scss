@@ -53,12 +53,10 @@
 $stars-small:  generateStars(700);
 $stars-medium: generateStars(200);
 $stars-big:    generateStars(100);
-
-body
-{
-  overflow: hidden;
-}
     
+.stars {
+  z-index: 0;
+}
 #stars1
 {
   width: 1px;
