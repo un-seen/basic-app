@@ -1,0 +1,29 @@
+
+.typed {
+    line-height: 0.8rem;
+    width: 80%;
+    font-size: 0.8rem;
+    text-align: left;
+    font-family: "Courier New", "Lucida Console", monospace;
+    vertical-align: text-bottom;
+}
+
+.typed-complete {
+    line-height: 0.8rem;
+    width: 80%;
+    font-size: 0.8rem;
+    text-align: left;
+    font-family: "Courier New", "Lucida Console", monospace;
+    vertical-align: text-bottom;
+}
+
+.typed::after {
+    content: "|";
+    font-size: 0.8rem;
+    animation: blink .75s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { color: transparent }
+    50% { color: rgba(245, 245, 245) }
+}

@@ -16,7 +16,7 @@ import { SearchUI } from "./components/search";
 import config from "./Config";
 import { useAtom } from "jotai";
 import { Library } from "hedwigai";
-import { idTokenAtom, idEmailAtom } from "./Store";
+import { idTokenAtom, idEmailAtom, chatLoadedAtom } from "./Store";
 
 enum Pane {
   CHAT,
@@ -34,6 +34,7 @@ const App = () => {
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
   const [healthStatus, setHealthStatus] = React.useState("❌");;
+  const [chatLoaded, _] = useAtom<boolean>(chatLoadedAtom);
   
   useEffect(() => {
     setLibrary(
@@ -150,8 +151,8 @@ const App = () => {
                 </span>
                 <span className="bottom_right"></span>
                 <span className="bottom_left"></span>
-              </div>
-              <div id="server-health">{healthStatus}</div>
+            </div>
+            <div id="server-health">{healthStatus}</div>
             </div>
           </div>
         <div className="main">
@@ -160,10 +161,7 @@ const App = () => {
             <div id="stars2"></div>
             <div id="stars3"></div>
           </div>
-          
-          {
-            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <ChatUI deactive={typeof library != 'undefined'} library={library}/>
-          }
+          <ChatUI disabled={!(libraryReady && typeof library != 'undefined' && pane==Pane.CHAT)} library={library}/>
           {
             libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <AtlasUI library={library}/>
           }
@@ -189,6 +187,7 @@ const App = () => {
                       <span className="bottom_left"></span>
                       <span className={`${signing ? "rotate-span" : "hide"}`}><i className="fa fa-refresh"></i></span>
                     </div>
+                    
                 </div>
                 <div id="server-health">Serverless {healthStatus}</div>
               </div>)

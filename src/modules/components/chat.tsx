@@ -1,61 +1,67 @@
 import React, { useEffect } from "react";
 import '../../css/chat.css';
+import '../../css/terminal.css';
+import { useAtom } from "jotai";
 import { Library, PromptData } from "hedwigai"
-
+import { chatLoadedAtom } from "../Store";
 
 interface ChatProps {
-  deactive: boolean;
+  disabled: boolean;
   library: Library;
 }
 
-function getRandomEmoji(): string {
-  const emojis = [
-    "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇",
-    "🙂", "🙃", "😉", "😎", "🤩", "😍", "😘", "😗", "😙", "😚",
-    "☺️", "🤗", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣",
-    "😥", "😮", "🤐", "😯", "😪", "😫", "😴", "😌", "😛", "😜",
-    "😝", "🤤", "😒", "😓", "😔", "😕", "🙁", "😖", "😞", "😟",
-    "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", "😬", "😰",
-    "😱", "🥵", "🥶", "😳", "🤪", "😵", "😡", "😠", "🤬", "😷",
-    "🤒", "🤕", "🤢", "🤮", "🤧", "😇", "🤠", "🤡", "🥳", "🥴",
-    "🥺", "🤥", "🤫", "🤭", "🧐", "🤓", "😈", "👿", "👹", "👺",
-    "💀", "👻", "👽", "👾", "🤖", "🎃", "😺", "😸", "😹", "😻",
-    "😼", "😽", "🙀", "😿", "😾", "👶", "👦", "👧", "👨", "👩",
-    "👴", "👵", "👮", "👷", "💂", "🕵️", "👯", "💃", "🕺", "👫",
-    "👬", "👭", "💏", "💑", "👪", "👤", "👥"
-  ];
+function convertSeconds(seconds: number): string {
+  const hours: number = Math.floor(seconds / 3600);
+  const minutes: number = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds: number = seconds % 60;
 
-  const randomIndex = Math.floor(Math.random() * emojis.length);
-  return emojis[randomIndex];
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+function getRandomId(): string {
+  const limit = 128512;
+
+  return String(Math.floor(Math.random() * limit));
+}
+
+
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
-  const [chatLoaded, setChatLoaded] = React.useState<boolean>(false);
   const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
   const [chatRequestChain, setChatRequestChain] = React.useState<Promise<void>>(
     Promise.resolve(),
   );
-  
+  const [triggerDialog, setTriggerDialog] = React.useState<string>("");
+  const [queuedChat, setQueuedChat] = React.useState<(() => void)[]>([]);
   const uiChat = React.useRef<HTMLDivElement>(null);
   const [uiChatInput, setUiChatInput] = React.useState<string>("");
-  const uiChatInfoLabel = React.useRef<HTMLLabelElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
   
-  const queueMessage = (alignment: "left" | "right", message: string) => {
-    appendMessage(alignment, message);
+  const queueMessage = (replace: boolean, alignment: "left" | "right", text: string, image_url: string | null = null, video_url: string | null = null) => {
+    setQueuedChat([...queuedChat, () => replace ? updateLastMessage(alignment, text) : appendMessage(alignment, text, image_url, video_url)])
   };
+
+  useEffect(() => {
+    // if (chatLoaded) return;
+    appendMessage("left", "Please give a prompt with keyword  \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
+
+    () => {
+      uiChat.current?.childNodes.forEach((node) => {
+        node.remove();
+      })
+    }
+  }, [])
 
   const changeFileInput = () => {
     // Display the selected file name
     if (fileInput.current.files.length === 0) {
-      queueMessage("left", "No file selected");
+      queueMessage(false, "left", "No file selected");
     } else {
       const file = fileInput.current.files[0] as File;
       if (typeof props.library === "undefined") return;
       props.library
         .indexFile(file)
         .then((result) => {
-          queueMessage("left", result["message"]);
+          queueMessage(false, "left", result["message"]);
         })
     }
   };
@@ -91,46 +97,44 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   };
 
   useEffect(() => {
-    if (requestInProgress) {
-      // interrupt previous generation if any
-      // props.library.interruptGenerateResponse();
+    if (queuedChat.length > 0) {
+      const task = queuedChat[0];
+      setRequestInProgress(true);
+      task()
+      setRequestInProgress(false);  
+      setQueuedChat(queuedChat.slice(1));
     }
-    // try reset after previous requests finishes
-    pushTask(async () => {
-      resetChatHistory();
-      await asyncInitChat();
-    });
-  }, []);
-
-  const onReset = () => {
-    if (requestInProgress) {
-      // interrupt previous generation if any
-      // props.library.interruptGenerateResponse();
-    }
-    // try reset after previous requests finishes
-    pushTask(async () => {
-      resetChatHistory();
-      await props.library.reset()
-    })
-  };
+  }, [triggerDialog]);
 
   // Internal helper functions
   const appendMessage = (
     kind: string,
     text: string,
     image_url: string | null = null,
-    video_url: string | null = null,
+    video_url: string | null = null
   ) => {
-    if (kind == "init") {
-      text = "[System Initalize] " + text;
-    }
-
     let msg: string;
+    let randomId = getRandomId();
+    let textLength = 0
+    function typeCharacter() {
+      uiChat?.current?.scrollTo(0, uiChat.current.scrollHeight)
+      let textChar = text.charAt(textLength++);
+      let paragraph = document.getElementById(randomId);
+      let charElement = document.createTextNode(textChar);
+      paragraph.appendChild(charElement);
+      if(textLength < text.length+1) {
+          setTimeout(() => typeCharacter(), 50);
+      } else {
+          document.getElementById(randomId)?.classList.replace("typed", "typed-complete")
+          text = '';
+          setTriggerDialog(randomId)
+      }
+  }
     if (image_url !== null) {
       msg = `
         <div class="msg ${kind}-msg">
           <div class="msg-bubble">
-            <div class="msg-text">${text}</div>
+            <div id=${randomId} class="msg-text typed"></div>
             <div class="circular-image">
                 <img src="data:image/jpeg;base64,${(
                   image_url as string
@@ -143,7 +147,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       msg = `
         <div class="msg ${kind}-msg">
             <div class="msg-bubble">
-                <div class="msg-text">${text}</div>
+                <div id=${randomId} class="msg-text typed"></div>
                 ${
                   video_url !== null
                     ? `<video width="320" height="240" controls> <source src="${video_url}" type="video/mp4"> </video>`
@@ -156,19 +160,16 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       msg = `
         <div class="msg ${kind}-msg">
           <div class="msg-bubble">
-            <div class="msg-text">${text}</div>
+            <div id=${randomId} class="msg-text typed"></div>
           </div>
         </div>
       `;
     }
     uiChat?.current?.insertAdjacentHTML("beforeend", msg);
-    uiChat?.current?.scrollTo(0, uiChat.current.scrollHeight);
+    typeCharacter();
   };
 
   const updateLastMessage = (kind: string, text: string) => {
-    if (kind == "init") {
-      text = "[System Initalize] " + text;
-    }
     const matches = uiChat.current?.getElementsByClassName(`msg ${kind}-msg`);
     if (typeof matches == "undefined" || matches?.length == 0)
       throw Error(`${kind} message do not exist`);
@@ -186,109 +187,81 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     uiChat.current.scrollTo(0, uiChat.current.scrollHeight);
   };
 
-  const resetChatHistory = () => {
-    const clearTags = ["left", "right", "init", "error"];
-    for (const tag of clearTags) {
-      // need to unpack to list so the iterator don't get affected by mutation
-      const matches = [...uiChat.current.getElementsByClassName(`msg ${tag}-msg`)];
-      for (const item of matches) {
-        uiChat.current.removeChild(item);
-      }
-    }
-    if (uiChatInfoLabel.current !== null) {
-      uiChatInfoLabel.current.innerHTML = "";
-    }
-  };
-
-  const asyncInitChat = async (): Promise<void> => {
-    if (chatLoaded) {
-      return
-    };
-    setRequestInProgress(true);
-    try {
-      const messages: PromptData[] = [{
-        "content": `Hi! I am here to chat to talk about the knowledge graph.`,
-        "role": "user"
-      }]
-      const result = await props.library.generateResponse(messages)
-      appendMessage("left", result["response"])
-      appendMessage("left", "Please give a prompt with keyword \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
-      setRequestInProgress(false);
-      setChatLoaded(true);
-    } catch (err) {
-      appendMessage("error", "Init error, " + err.toString());
-      console.log(err.stack);
-      setRequestInProgress(false);
-    }
-  };
-
   /**
    * Run generate
    */
   const asyncGenerate = async () => { 
-    await asyncInitChat();
-    setRequestInProgress(true);
     const prompt = uiChatInput;
     if (prompt == "" || typeof prompt == "undefined") {
-      setRequestInProgress(false);
       return;
     }
     
     setUiChatInput("")
-    appendMessage("right", prompt);    
 
     try {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
-        appendMessage("left", "Searching library...");
+        appendMessage("right", prompt);    
+        queueMessage(false, "left", "Searching library...");
         const catalog = await props.library.findImage(prompt);
         catalog['response'] = JSON.parse(catalog['response']);
-        updateLastMessage("left", `Here is the personalized catalog for your prompt.`);
+        queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
         let ct = 0;
-        let program = "You are given information about items and you talk about those.";
         for (const item of catalog["response"]) {
           const url = item["image"];
-          let text = "";
+          let caption = item["caption"];
+          caption = caption.charAt(0).toUpperCase() + caption.substr(1).toLowerCase()
+          let text = `This file with name ${item['id']}. ${caption} <br/>`;
           for (const key in item) {
-            if (['image', 'caption', 'dist'].includes(key)) continue;
-            if (key == 'id') {
-              text += `This file has name ${item[key]} <br/>`
-            } else {
-              text += `➕ ${key} => ${item[key]} <br/>`;
+            if (['image', 'image_description', 'dist', 'id'].includes(key) || (item[key] == null || item[key] == "")) {
+              continue
             }
+            text += `The ${key} is a ${item[key]}. `;
           }
-          appendMessage("left", text, url);
-          program += `\n * ${item["caption"]}`;
+          queueMessage(false, "left", text, url);
           ct += 1;
           if (ct > 4) {
             break;
           }
         }
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
-        appendMessage("left", "Searching library...");
-        const frames = await props.library.seekVideo(prompt);
-        updateLastMessage(
+        let query = prompt.replaceAll("seek", "");
+        if(query.length == 0) {
+          return
+        }
+        appendMessage("right", prompt);    
+        queueMessage(false, "left", "Searching library...");
+        const frames = await props.library.seekVideo(query);
+        
+        queueMessage(
+          true,
           "left",
-          `Here is the list of moments in the videos for your prompt.`,
+          `Here is the list of moments in the videos for your prompt.`
         );
+        setTriggerDialog("seek");
         let ct = 0;
-        const videos: { [key: string]: string } = {};
         for (const item of frames["response"]) {
           const path = item["path"];
-          const url = item["url"];
           const timestamp = item["timestamp"];
           const frame = item["frame"];
-          const message = `\n In the video ${path} at frame ${timestamp}`;
-          appendMessage("left", message, frame);
-          videos[path] = url;
+          const message = `\n In the video ${path} at ${convertSeconds(timestamp)}. ${item['caption']}`;
+          setTriggerDialog(timestamp);
+          queueMessage(false, "left", message, frame);
+          setTriggerDialog(timestamp + "T");
           ct += 1;
           if (ct > 1) {
             break;
           }
         }
       } else if (prompt.includes("?") && typeof props.library !== "undefined") {
-        appendMessage("left", "Searching library...");
+        appendMessage("right", prompt);    
+        queueMessage(false, "left", "Searching library...");
         const conversations = await props.library.findConversation(prompt.replaceAll("?", ""));
-        let augmentedPrompt = "You are a chatterbox, who is fed questions and answers. Then uses it for reference in your conversation."
+        setTriggerDialog("?s");
+        queueMessage(
+          true,
+          "left",
+          `Here is the list of conversations for your prompt.`
+        );
         let ct = 0;
         for (const item of conversations.response) {
           const question = item["question"];
@@ -296,39 +269,42 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           const text = `
           question: ${question}
           answer: ${answer}`
-          appendMessage("left", text);
-          augmentedPrompt += `\n * ${text}`;
+          queueMessage(false, "left", text);
+          setTriggerDialog(text);
           ct += 1;
           if (ct > 1) {
             break;
           }
         }
       } else {
-        appendMessage("left", "Thinking...")
+        appendMessage("right", prompt);    
+        queueMessage(false, "left", "Thinking...")
         const messages: PromptData[] = [{
           "content": prompt,
           "role": "user"
         }]
         const result = await props.library.generateResponse(messages)
-        updateLastMessage("left", result["response"])
-        appendMessage("left", "Please give a prompt with \n [1] catalog for images \n  [2] seek for videos \n  [3] ? for conversation");
+        queueMessage(true, "left", result["response"], true)
+        setTriggerDialog(prompt)
+        setTimeout(() => {
+          queueMessage(false, "left", "Please give a prompt with keyword  \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
+          setTriggerDialog("generated");
+        }, 2000)
       }
-      uiChatInfoLabel.current.innerHTML = await props.library.runtimeStatsText();
     } catch (err) {
-      appendMessage("error", "Generate error, " + err.toString());
-      console.log(err.stack);
+      queueMessage(false, "error", "Generate error, " + err.toString());
     }
-    setRequestInProgress(false);
   };
 
   return (
-    <div className="glass">
+    <div className="glass" style={{"display": (props.disabled || typeof props.library == 'undefined') ? "none" : "flex"}}>
       <div
         className="chatui-chat"
         id="chatui-chat"
         style={{ height: "100" }}
         ref={uiChat}
-      ></div>
+      >
+      </div>
       <div className="chatui-inputarea">
         <input
           id="chatui-input"
@@ -346,9 +322,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         >
           Send
         </button>
-        <button id="chatui-reset-btn" className="chatui-btn" onClick={onReset}>
-          Reset 🎬
-        </button>
         <input
           type="file"
           id="chatui-file-input"
@@ -363,9 +336,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         >
           Add 📚
         </button>
-      </div>
-      <div className="chatui-extra-control">
-        <label id="chatui-info-label" ref={uiChatInfoLabel}></label>
       </div>
     </div>
   );
