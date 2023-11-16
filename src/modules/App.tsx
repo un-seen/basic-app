@@ -15,6 +15,7 @@ import Asset from "./Asset"
 import { SearchUI } from "./components/search";
 import config from "./Config";
 import { useAtom } from "jotai";
+import { isMobile } from "react-device-detect";
 import { Library } from "hedwigai";
 import { idTokenAtom, idEmailAtom, chatLoadedAtom } from "./Store";
 
@@ -71,7 +72,7 @@ const App = () => {
     if(signing) return;
     if (typeof library == 'undefined' || libraryReady) {
       setSigning(false);
-      document.getElementById("library-email")?.removeAttribute("disabled");
+      document.getElementById("email-bar")?.removeAttribute("disabled");
       setEmail("");
       setSavedEmail("");
       setIdToken("");
@@ -93,7 +94,7 @@ const App = () => {
   useEffect(() => {
     if (typeof library == 'undefined') return;
     if(libraryReady) {
-      document.getElementById("library-email")?.setAttribute("disabled", "true");
+      document.getElementById("email-bar")?.setAttribute("disabled", "true");
       setSignInText("Sign Out");    
       library.setup(email).then((success: Boolean) => {
         if(!success) {
@@ -142,7 +143,7 @@ const App = () => {
             )
           }
           <div className="controls" style={{display: libraryReady ? "flex" : "none"}}>
-            <input id="library-email" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
+            <input id="email-bar" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)} />
             <div className='btn-star' style={{"width": "4rem", "textAlign": "center"}} onClick={interactWithSignButton}>
                 <span className="top_left"></span>
                 <span className="top_right"></span>
@@ -163,7 +164,7 @@ const App = () => {
           </div>
           <ChatUI disabled={!(libraryReady && typeof library != 'undefined' && pane==Pane.CHAT)} library={library}/>
           {
-            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <AtlasUI library={library}/>
+            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && !isMobile && <AtlasUI library={library}/>
           }
           {
             libraryReady && typeof library != 'undefined' && pane==Pane.SEARCH && <SearchUI library={library}/>
@@ -175,7 +176,7 @@ const App = () => {
                 <h2>Your ai powered knowledge graph</h2>
                 <img src={libraryReady ? "" : Asset.LANDING_LOGO} alt="hedwigAI" style={{"position": "absolute", "top": "0vh", "width": "5rem"}} />
                 <div className='controls' style={{display: !libraryReady ? "flex" : "none", columnGap: "0.8rem"}}>
-                    <input id="library-email" style={{"color": "black"}} type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)}>
+                    <input id="email-landing" type="text" placeholder="Enter Account Email" value={email} onKeyDown={registerEnterKeyOnEmail} onChange={(e) => setEmail(e.target.value)}>
                     </input>
                     <div className={`btn-star ${signing ? "active" : ""}`} style={{"width": "3rem"}} onClick={interactWithSignButton}>
                       <span className="top_left"></span>

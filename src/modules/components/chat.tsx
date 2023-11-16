@@ -203,21 +203,25 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
         const catalog = await props.library.findImage(prompt);
-        catalog['response'] = JSON.parse(catalog['response']);
         queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
+        setTimeout(() => setTriggerDialog(prompt), 1000);
+        catalog['response'] = JSON.parse(catalog['response']);
+        
         let ct = 0;
         for (const item of catalog["response"]) {
           const url = item["image"];
           let caption = item["caption"];
           caption = caption.charAt(0).toUpperCase() + caption.substr(1).toLowerCase()
-          let text = `This file with name ${item['id']}. ${caption} <br/>`;
+          let text = `This file with name ${item['id']}. ${caption}`;
           for (const key in item) {
             if (['image', 'image_description', 'dist', 'id'].includes(key) || (item[key] == null || item[key] == "")) {
               continue
             }
             text += `The ${key} is a ${item[key]}. `;
           }
+          setTriggerDialog(caption);
           queueMessage(false, "left", text, url);
+          setTriggerDialog(caption + "_added");
           ct += 1;
           if (ct > 4) {
             break;

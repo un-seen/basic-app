@@ -28,10 +28,33 @@
     align-items: center;
 }
 
-#library-email {
+#email-bar {
     border-radius: 0.5rem;
     font-size: 1.1rem;
     color: white;
     font-family: 'Saira Semi Condensed', sans-serif;
     padding-left: 0.5rem;
+}
+
+#email-landing {
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    color: rgb(0, 0, 0);
+    font-family: 'Saira Semi Condensed', sans-serif;
+    padding-left: 0.5rem;
+}
+
+
+@media screen and (max-width: 850px) {
+    #email-bar {
+        display: none;
+    }
+
+    .switch-button {
+        display: none;
+    }
+
+    .circular-image {
+        width: 10rem;
+    }
 }

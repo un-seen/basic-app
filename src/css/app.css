@@ -6,8 +6,8 @@
 .app {
   display: block;
   background-color: rgb(255, 255, 255);
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 }
 
 #logo {
@@ -35,7 +35,12 @@
   background-color: transparent;
 }
 
-#library-email:focus {
+#email-bar:focus {
+  outline-style: solid;
+  outline-color: rgb(229, 255, 0);
+}
+
+#email-landing:focus {
   outline-style: solid;
   outline-color: rgb(229, 255, 0);
 }

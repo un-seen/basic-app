@@ -1,4 +1,4 @@
-.spaceui {
+.atlasui {
     position: relative;
     width: 50vw;
     height: 80vh;
@@ -23,8 +23,11 @@
     }
   }
 
-  @media (max-width: 850px) {
-    .spaceui {
-      display: hidden;
+  @media only screen and (max-width: 850px) {
+    .atlasui {
+      display: none;
+    }
+    .glass {
+      width: auto;
     }
   }

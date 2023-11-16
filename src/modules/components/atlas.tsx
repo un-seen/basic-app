@@ -75,7 +75,7 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
     }, [graphData])
 
     return (
-        <div ref={ref} className="spaceui">
+        <div ref={ref} className="atlasui">
         </div>
     )
 }

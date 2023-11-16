@@ -1,11 +1,12 @@
-.switch-button{
-	width: 14rem;
+.switch-button {
 	text-align: center;
 	position: relative;
 	z-index: 197 !important;
 	cursor: pointer;
+	width: 14%;
+
 	transition: .3s ease all;
-	border: 1px solid white;
+	border: 0.05rem solid white;
 	
     &-case{
 		display: inline-block;
@@ -17,8 +18,8 @@
 		border: none;
 		transition: .3s ease all;
 		text-transform: uppercase;
-		letter-spacing: 5px;
-		padding-bottom: 1px;
+		letter-spacing: 0.2rem;
+		padding-bottom: 0.01rem;
 		&:hover{
 			color: rgb(255, 255, 255);
             filter: brightness(5.2);
@@ -45,8 +46,5 @@
         .right {
             background-color: white;
         }
-
 	}
-
-
 }
