@@ -2,64 +2,80 @@ import React, { useEffect } from "react";
 import { Library } from "hedwigai";
 import "../../css/search.css";
 
-interface SearchProps {
-    library: Library;
-}
 
-interface File {
+interface SearchItem {
 	id: string;
 	url: string;
 	image: string;
-	roomType: RoomType;
+	caption: string;
+	dist: string;
 }
 
-enum RoomType {
-	CONVERSATION,
-	VIDEO,
-	IMAGE
+interface SearchProps {
+	disabled: boolean;
+	library: Library;
 }
 
 const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 
-	const [searchTerm, setSearchTerm] = React.useState<string>("Write your search term here...");
-	const [files, setFiles] = React.useState<Array<string>>([]);
+	const [prompt, setPrompt] = React.useState<string>("Write your search term here...");
+	const [searchItems, setSearchItems] = React.useState<SearchItem[]>([]);
+	const [typingTimeout, setTypingTimeout] = React.useState<NodeJS.Timeout>();
+
+	const handlePromptChange = (e) => {
+	  const text = e.target.value;
+	  // Clear the previous timeout
+	  clearTimeout(typingTimeout);
+	  // Set a new timeout to update state after 2 seconds
+	  const newTimeout = setTimeout(() => setPrompt(text), 2000);
+	  setTypingTimeout(newTimeout);
+	};
+
+	useEffect(() => {
+		props.library.seekVideo(prompt).then((frames) => {
+			const items: SearchItem[] = []
+			for (const item of frames["response"]) {
+				items.push({
+					id: item["id"],
+					url: item["path"],
+					image: item["frame"],
+					caption: item['caption'],
+					dist: item['dist']
+				});
+			}
+			setSearchItems([...items])
+		})
+	}, [prompt])
 
     return (
         <div className="searchui">
             <article className="sec-wrap">
 			<div className="sec">
-				<p className="sec-title">{searchTerm}</p>
+				<input
+				className="sec-title"
+				type="text"
+				style={{"display": searchItems.length == 0 ? "none" : "block"}}
+				onChange={handlePromptChange}
+				placeholder="Type here..."
+				/>
 				<ul className="sec-middle" id="vid-grid">
-
-					<li className="thumb-wrap"><a href="">
-						<img className="thumb" src="https://images.unsplash.com/photo-1555661225-ade1bbf3fbb3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1957&q=80" alt="" />
-						<div className="thumb-info">
-							<p className="thumb-title">This is the longest title of them all, such a long title that it is beeing cut off</p>
-							<p className="thumb-user">Username</p>
-							<p className="thumb-text">1.3K Views</p>
-						</div>
-					</a></li>
-
-					<li className="thumb-wrap"><a href="">
-						<img className="thumb" src="https://images.unsplash.com/photo-1566075247408-2fc9e74810d2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80" alt="" />
-						<div className="thumb-info">
-							<p className="thumb-title">Video Title 2 - Super Long Title With Really Long New Line</p>
-							<p className="thumb-user">Username</p>
-							<p className="thumb-text">57K Views</p>
-						</div>
-					</a></li>
-
-					<li className="thumb-wrap"><a href="">
-						<img className="thumb" src="https://images.unsplash.com/photo-1559083991-9bdef0bb5a39?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1955&q=80" alt="" />
-						<div className="thumb-info">
-							<p className="thumb-title">Video Title 3 - Short Title</p>
-							<p className="thumb-user">Username</p>
-							<p className="thumb-text">4.6K Views</p>
-						</div>
-					</a></li>
-
+					{
+						searchItems.map((item) => {
+							const imageInfo = `data:image/jpeg;base64,${(item.image).replace(/^b'|'$/g, "")}`;
+							return (
+								<li className="thumb-wrap"><a href={item.url}>
+									<img className="thumb"  src={imageInfo} alt={item.caption}/>
+									<div className="thumb-info">
+										<p className="thumb-title">{item.caption}</p>
+										<p className="thumb-user">{item.url}</p>
+										<p className="thumb-text">{item.dist}</p>
+									</div>
+								</a></li>
+							)
+						})
+					}
 				</ul>
-				<a className="showmore">Show more</a>
+				<a className="showmore"></a>
 			</div>
 		</article>
         </div>
