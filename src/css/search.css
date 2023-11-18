@@ -1,10 +1,11 @@
-.sec-wrap {
+.searchui {
+    background-color: inherit;
+    padding-bottom: 5rem;
 }
 
 .sec {
     width: 85%;
-    margin: 3em auto;
-    border-bottom: 2px solid #353535;
+    margin: 3rem auto;
     text-align: left;
 }
 
@@ -14,9 +15,8 @@
     justify-content: center;
     align-content: center;
     grid-template-rows: auto;
-    grid-row-gap: 15px;
-    grid-column-gap: 10px;
-    padding: 20px 0;
+    grid-row-gap: 2rem;
+    grid-column-gap: 1rem;
 }
 
 .thumb-wrap {
@@ -31,17 +31,19 @@
     width: 100%;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
     opacity: 1;
+    filter: brightness(1.1) contrast(1.1) drop-shadow(0 0 0.15em #ddd);
+    border: #f5f5f5 0.05rem solid;
     transition: all .2s ease-in-out;
 }
 
 .thumb:hover {
-    opacity: .8;
+    opacity: .95;
+    border-color: rgba(130,202,204,255);
     box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .5);
 }
 
 .thumb-info {
     display: inline-block;
-    height: 100%;
     width: 100%;
     padding: .4em;
 }

@@ -2,15 +2,15 @@
 /* From https://css.glass */
 .glass {
   background: inherit;
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(0.5rem);
-  -webkit-backdrop-filter: blur(0.5rem);
-  border: 0.1rem solid rgba(255, 255, 255, 0.3);
+  border-radius: 1.5em;
+  box-shadow: 0 0.5em 2em rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(0.5em);
+  -webkit-backdrop-filter: blur(0.5em);
+  border: 0.1em solid rgba(255, 255, 255, 0.3);
   display: flex;
   flex-flow: column wrap;
   justify-content: space-between;
-  margin: 1rem 1rem;
+  margin: 1em 1em;
   height: 85%;
   width: 50%;
   justify-items: center;
@@ -22,36 +22,35 @@
   display: flex;
   flex-flow: column wrap;
   justify-content: space-between;
-  margin: 1rem 1rem;
+  margin: 1em 1em;
   height: 85%;
-  border: 0.1rem solid #dddddd;
-  border-radius: 1rem;
+  border: 0.1em solid #dddddd;
+  border-radius: 1em;
   width: 50%;
-  box-shadow: 0 1rem 1rem -0.5rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1em 1em -0.5em rgba(0, 0, 0, 0.2);
 }
 
 .chatui-header {
   display: flex;
   justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 0.05rem solid #ddd;
+  padding: 1em;
+  border-bottom: 0.05em solid #ddd;
   color: #ffffff;
 }
 
 .chatui-chat {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1em;
   background: inherit;
-  filter: blur(0.5rem);
   font-family: 'Saira Semi Condensed', sans-serif;
-  filter: drop-shadow(0 0 0.15rem #ddd);
+  filter: drop-shadow(0 0 0.15em #ddd);
   border-top-left-radius: 3%;
   border-top-right-radius:  3%;
 }
 
 .chatui-chat::-webkit-scrollbar {
-  width: 0.5rem;
+  width: 0.5em;
 }
 
 .chatui-chat::-webkit-scrollbar-track {
@@ -60,13 +59,13 @@
 
 .chatui-chat::-webkit-scrollbar-thumb {
   background: #000000;
-  border: #ddd 0.01rem solid;
+  border: #ddd 0.01em solid;
 }
 
 .msg {
   display: flex;
   align-items: flex-end;
-  margin-bottom: 1rem;
+  margin-bottom: 1em;
 }
 
 .msg:last-of-type {
@@ -76,16 +75,16 @@
 .msg-bubble {
   display: flex;
   flex-direction: row;
-  max-width: 30rem;
-  padding: 1rem;
-  border-radius: 2.4rem;
-  border-width: 0.1rem;
+  max-width: 30em;
+  padding: 1em;
+  border-radius: 2.4em;
+  border-width: 0.1em;
   border-style: solid;
   border-color: rgb(54, 178, 200);
   color: rgb(255, 255, 255);
   background: #000000;
-  filter: contrast(0.5rem) blur(0.5rem);
-  box-shadow: 0 0 0.2rem #9ecaed;
+  filter: contrast(0.5em) blur(0.5em);
+  box-shadow: 0 0 0.2em #9ecaed;
 }
 
 .left-msg .msg-bubble {
@@ -113,25 +112,25 @@
 }
 
 .chatui-extra-control {
-  filter: drop-shadow(0 0 0.15rem #ddd);
+  filter: drop-shadow(0 0 0.15em #ddd);
   color: white;
   text-align: center;
-  padding-bottom: 0.3rem;
+  padding-bottom: 0.3em;
   
 }
 
 .chatui-inputarea {
   display: flex;
-  padding: 10px;
+  padding: 1em;
   background: inherit;
-  border-top: 0.01rem solid #ddd;
+  border-top: 0.01em solid #ddd;
   border-color: #ffffff;
 }
 
 .chatui-inputarea * {
-  padding: 1rem;
+  padding: 1em;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.5em;
   font-size: 1em;
 }
 
@@ -147,10 +146,10 @@
 }
 
 .chatui-btn {
-  margin-left: 1rem;
+  margin-left: 1em;
   background: #ffffff;
-  border-radius: 0.4rem;
-  width: 5rem;
+  border-radius: 0.4em;
+  width: 5em;
   cursor: pointer;
   font-family: 'Saira Semi Condensed', sans-serif;
 }
@@ -160,7 +159,7 @@
 }
 
 .chatui-send-btn {
-  margin-left: 1rem;
+  margin-left: 1em;
   background:  #6cc3c5;
   opacity: 1.0;
   color:rgb(255, 255, 255)f;
@@ -178,13 +177,11 @@
 }
 
 .circular-image {
-  width: 20rem; /* Set the desired width and height for the circular image */
-  height: 10rem;
-  border-radius: 1rem; /* Create a circular clipping mask */
+  width: 20vw; /* Set the desired width and height for the circular image */
+  height: 10em;
+  border-radius: 1em; /* Create a circular clipping mask */
   overflow: hidden; /* Hide any image overflow outside the circle */
-  border-color: rgb(255, 255, 255);
-  border-style: solid;
-  border-width: 0.01 rem;
+  filter: drop-shadow(0 0 0.15em #fdfb78);
   user-select: none;
 }
 
@@ -196,9 +193,9 @@
 }
 
 #chatui-reset-btn {
-  width: 4rem;
+  width: 4em;
 }
 
 #chatui-upload-btn {
-  width: 4rem;
+  width: 4em;
 }

@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 import '../../css/chat.css';
 import '../../css/terminal.css';
-import { useAtom } from "jotai";
 import { Library, PromptData } from "hedwigai"
-import { chatLoadedAtom } from "../Store";
 
 interface ChatProps {
   disabled: boolean;
@@ -123,7 +121,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       let charElement = document.createTextNode(textChar);
       paragraph.appendChild(charElement);
       if(textLength < text.length+1) {
-          setTimeout(() => typeCharacter(), 50);
+          setTimeout(() => typeCharacter(), 10);
       } else {
           document.getElementById(randomId)?.classList.replace("typed", "typed-complete")
           text = '';
@@ -184,7 +182,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     });
     msgText[0].innerHTML = "";
     list.forEach((item) => msgText[0].append(item));
-    uiChat.current.scrollTo(0, uiChat.current.scrollHeight);
+    // uiChat.current.scrollTo(0, uiChat.current.scrollHeight);
   };
 
   /**
@@ -202,7 +200,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
-        const catalog = await props.library.findImage(prompt);
+        const catalog = await props.library.findImage(prompt, 3);
         queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
         setTimeout(() => setTriggerDialog(prompt), 1000);
         catalog['response'] = JSON.parse(catalog['response']);
@@ -234,7 +232,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
-        const frames = await props.library.seekVideo(query);
+        const frames = await props.library.seekVideo(query, 3);
         
         queueMessage(
           true,
@@ -259,7 +257,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       } else if (prompt.includes("?") && typeof props.library !== "undefined") {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
-        const conversations = await props.library.findConversation(prompt.replaceAll("?", ""));
+        const conversations = await props.library.findConversation(prompt.replaceAll("?", ""), 3);
         setTriggerDialog("?s");
         queueMessage(
           true,

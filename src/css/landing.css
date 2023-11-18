@@ -8,9 +8,7 @@
     text-align: center;
     row-gap: 2rem;
     margin-top: 3rem;
-    padding-bottom: 0;
     flex-direction: column;
-    overflow: hidden;
 }
 .landing > h1 {
     font-size: 10rem;

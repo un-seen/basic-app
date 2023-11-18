@@ -5,9 +5,10 @@
 
 .app {
   display: block;
-  background-color: rgb(255, 255, 255);
+  background-color: black;
   height: 100%;
   width: 100%;
+  align-items: center;
 }
 
 #logo {
@@ -22,7 +23,7 @@
   justify-content: space-between;
   align-items: center;
   align-content: center;
-  padding-top: 0.5rem;
+  padding-top: 1rem;
   justify-self: center;
   height:3%;
 }
@@ -31,7 +32,9 @@
   display: flex;
   flex-direction: row;
   background: radial-gradient(ellipse at bottom, #1B2735 0%, #191F24 100%);
-  height: 96%;
+  width: 100%;
+  height: 95%;
+  overflow: hidden;
   background-color: transparent;
 }
 

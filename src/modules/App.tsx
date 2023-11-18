@@ -14,10 +14,8 @@ import "regenerator-runtime";
 import Asset from "./Asset"
 import { SearchUI } from "./components/search";
 import config from "./Config";
-import { useAtom } from "jotai";
 import { isMobile } from "react-device-detect";
 import { Library } from "hedwigai";
-import { idTokenAtom, idEmailAtom, chatLoadedAtom } from "./Store";
 
 enum Pane {
   CHAT,
@@ -27,20 +25,27 @@ enum Pane {
 const App = () => {
   
   const [email, setEmail] = React.useState<string>("");
-  const [savedEmail, setSavedEmail] = useAtom<string>(idEmailAtom);
   const [library, setLibrary] = React.useState<Library>();
   const [pane, setPane] = React.useState<Pane>(Pane.CHAT);
-  const [idToken, setIdToken] = useAtom<string>(idTokenAtom);
+  const [idToken, setIdToken] = React.useState<string>("");
   const [signing, setSigning] = React.useState<boolean>(false);
   const [libraryReady, setLibraryReady] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign In");
   const [healthStatus, setHealthStatus] = React.useState("❌");;
-  const [chatLoaded, _] = useAtom<boolean>(chatLoadedAtom);
   
   useEffect(() => {
     setLibrary(
       new Library({ deployment: config.HEDWIGAI_DEPLOYMENT, url: config.HEDWIGAI_URL })
     )
+
+    return () => {
+      setSigning(false);
+      document.getElementById("email-bar")?.removeAttribute("disabled");
+      setEmail("");
+      setIdToken("");
+      setSignInText("Sign In");
+      setLibraryReady(false);
+    }
   }, [])
 
   useEffect(() => {
@@ -61,11 +66,6 @@ const App = () => {
         setHealthStatus("Server Disconnected ❌")
       }
     })
-    if(idToken.length > 0) {
-      library.setIdToken(idToken)
-      setEmail(savedEmail);
-      setLibraryReady(true);
-    }
   }, [library])
 
   const interactWithSignButton = () => {
@@ -74,15 +74,14 @@ const App = () => {
       setSigning(false);
       document.getElementById("email-bar")?.removeAttribute("disabled");
       setEmail("");
-      setSavedEmail("");
       setIdToken("");
       setSignInText("Sign In");
       setLibraryReady(false);
     } else {
       setSigning(true);
       library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
+        console.log(`signing in with ${email}`)
         if(success) {
-          setSavedEmail(email);
           setIdToken(library.getIdToken());
           setLibraryReady(true)
         }
