@@ -6,6 +6,8 @@ import "../css/button.scss";
 import "../css/stars.scss";
 import "../css/switch.scss";
 import "../css/signing.css";
+import "../css/Toast.css";
+import Toast from "./components/Toast";
 import "../css/landing.css";
 import "../css/glass-button.css";
 import { ChatUI } from "./components/chat";
@@ -34,9 +36,7 @@ const App = () => {
   const [healthStatus, setHealthStatus] = React.useState("❌");;
   
   useEffect(() => {
-    setLibrary(
-      new Library({ deployment: config.HEDWIGAI_DEPLOYMENT, url: config.HEDWIGAI_URL })
-    )
+    setLibrary(new Library())
 
     return () => {
       setSigning(false);
@@ -51,6 +51,7 @@ const App = () => {
   useEffect(() => {
     if (typeof library == 'undefined') return
     library.healthCheck().then((result) => {
+      console.log(result)
       if (result["healthy"] === "yes") {
         setHealthStatus("✅");
         setInterval(() => {
@@ -63,7 +64,7 @@ const App = () => {
           }))();
         }, 1000);
       } else {
-        setHealthStatus("Server Disconnected ❌")
+        setHealthStatus("❌")
       }
     })
   }, [library])
@@ -80,10 +81,13 @@ const App = () => {
     } else {
       setSigning(true);
       library.signIn(email, config.HEDWIGAI_PASSWORD).then((success: Boolean) => {
-        console.log(`signing in with ${email}`)
         if(success) {
+          Toast("Welcome 🎉")
           setIdToken(library.getIdToken());
           setLibraryReady(true)
+        } else {
+          console.log("signing failed")
+          Toast("Credentials are ❌")
         }
         setSigning(false)
       })
@@ -95,11 +99,6 @@ const App = () => {
     if(libraryReady) {
       document.getElementById("email-bar")?.setAttribute("disabled", "true");
       setSignInText("Sign Out");    
-      library.setup(email).then((success: Boolean) => {
-        if(!success) {
-          return;
-        }
-      })
     }
   }, [libraryReady])
 

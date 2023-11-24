@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
 import { Library } from "hedwigai";
 import "../../css/search.css";
+import Toast from "./Toast.js";
+import { convertSeconds } from "./math";
 
 interface SearchItem {
 	id: string;
 	url: string;
 	image: string;
 	caption: string;
-	dist: string;
+	timestamp: string;
 }
 
 interface SearchProps {
@@ -34,6 +36,7 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 
 	useEffect(() => {
 		setLoading(true)
+		Toast("Searching 🔍")
 		props.library.seekVideo(prompt, 10).then((frames) => {
 			const items: SearchItem[] = []
 			for (const item of frames["response"]) {
@@ -42,7 +45,7 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 					url: item["path"],
 					image: item["frame"],
 					caption: item['caption'],
-					dist: item['dist']
+					timestamp: convertSeconds(item['timestamp'])
 				});
 			}
 			setSearchItems([...items])
@@ -75,7 +78,7 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 										<div className="thumb-info">
 											<p className="thumb-title">{item.caption}</p>
 											<p className="thumb-user">{item.url}</p>
-											<p className="thumb-text">{item.dist}</p>
+											<p className="thumb-text">{item.timestamp}</p>
 										</div>
 									</a>
 								</li>

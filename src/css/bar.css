@@ -45,7 +45,7 @@
 }
 
 
-@media screen and (max-width: 850px) {
+@media only screen and (max-width: 950px) {
     #email-bar {
         display: none;
     }
@@ -54,7 +54,10 @@
         display: none;
     }
 
-    .circular-image {
-        width: 10rem;
-    }
+    .msg-bubble {
+        align-items: center;
+         flex-direction: column-reverse;    
+         row-gap: 0.5rem;
+         font-size: 0.5rem;  
+      }
 }

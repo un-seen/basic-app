@@ -2,26 +2,12 @@ import React, { useEffect } from "react";
 import '../../css/chat.css';
 import '../../css/terminal.css';
 import { Library, PromptData } from "hedwigai"
+import { convertSeconds, getRandomId } from "./math";
 
 interface ChatProps {
   disabled: boolean;
   library: Library;
 }
-
-function convertSeconds(seconds: number): string {
-  const hours: number = Math.floor(seconds / 3600);
-  const minutes: number = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds: number = seconds % 60;
-
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-}
-
-function getRandomId(): string {
-  const limit = 128512;
-
-  return String(Math.floor(Math.random() * limit));
-}
-
 
 const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [requestInProgress, setRequestInProgress] = React.useState<boolean>(false);
@@ -54,8 +40,10 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     if (fileInput.current.files.length === 0) {
       queueMessage(false, "left", "No file selected");
     } else {
+      console.log("loading file...");
       const file = fileInput.current.files[0] as File;
       if (typeof props.library === "undefined") return;
+      console.log(file);
       props.library
         .indexFile(file)
         .then((result) => {
