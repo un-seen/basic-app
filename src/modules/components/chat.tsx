@@ -40,14 +40,13 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     if (fileInput.current.files.length === 0) {
       queueMessage(false, "left", "No file selected");
     } else {
-      console.log("loading file...");
       const file = fileInput.current.files[0] as File;
       if (typeof props.library === "undefined") return;
-      console.log(file);
       props.library
         .indexFile(file)
         .then((result) => {
-          queueMessage(false, "left", result["message"]);
+          queueMessage(false, "left", `${file.name} Uploaded ✅`);
+          setTriggerDialog(`file_uploaded ${file.name}`);
         })
     }
   };

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
+import "../css/notification.css";
 import "../css/button.scss";
 import "../css/stars.scss";
 import "../css/switch.scss";
@@ -51,7 +52,6 @@ const App = () => {
   useEffect(() => {
     if (typeof library == 'undefined') return
     library.healthCheck().then((result) => {
-      console.log(result)
       if (result["healthy"] === "yes") {
         setHealthStatus("✅");
         setInterval(() => {
@@ -86,7 +86,6 @@ const App = () => {
           setIdToken(library.getIdToken());
           setLibraryReady(true)
         } else {
-          console.log("signing failed")
           Toast("Credentials are ❌")
         }
         setSigning(false)
@@ -94,14 +93,37 @@ const App = () => {
     }
   };
   
+  const [notification, setNotification] = React.useState<{[key: string]: string}>({});
+
   useEffect(() => {
     if (typeof library == 'undefined') return;
     if(libraryReady) {
       document.getElementById("email-bar")?.setAttribute("disabled", "true");
       setSignInText("Sign Out");    
+
+      setInterval(() => {
+        (async () => await library.getNotification().then((value: {[key: string]: string}) => {
+          if (value["commit_id"].length > 0) {
+            setNotification(value)
+          }
+        }))();
+      }
+      , 3000);
     }
   }, [libraryReady])
 
+  const notificationClick = () => {
+    if (typeof library == 'undefined') return;
+    if (libraryReady && Object.keys(notification).length > 0) {
+      Toast("🎉 New Update Available 🎉")
+      Toast(notification["message"])
+      library.commitNotification(notification["commit_id"]).then(() => {
+        setNotification({})
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+  }
   const registerEnterKeyOnEmail = (event) => {
     if (event.keyCode === 13) {
       interactWithSignButton();
@@ -118,14 +140,19 @@ const App = () => {
     }
   }, [pane])
 
+
   return (
     <div className="app">
         <div className="bar">
           <div id="logo" style={{"paddingTop": "0.5rem", display: libraryReady ? "flex" : "none"}}>
             <img src={Asset.LANDING_LOGO} style={{"width": "2rem"}} alt="hedwigAI" />
-              <div id="title">
+            <div id="title">
                     hedwigAI
-              </div>
+            </div>
+            <button type="button" className="icon-button" onClick={notificationClick}>
+              <span className="material-icons">notifications</span>
+              <span className="icon-button__badge" style={{"display": Object.keys(notification).length > 0  ? "flex" : "none"}}>1</span>
+            </button>
           </div>
           {
             libraryReady && typeof library != 'undefined' && (
