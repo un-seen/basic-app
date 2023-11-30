@@ -198,12 +198,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           let caption = item["caption"];
           caption = caption.charAt(0).toUpperCase() + caption.substr(1).toLowerCase()
           let text = `This file with name ${item['id']}. ${caption}`;
-          for (const key in item) {
-            if (['image', 'image_description', 'dist', 'id'].includes(key) || (item[key] == null || item[key] == "")) {
-              continue
-            }
-            text += `The ${key} is a ${item[key]}. `;
-          }
           setTriggerDialog(caption);
           queueMessage(false, "left", text, url);
           setTriggerDialog(caption + "_added");
