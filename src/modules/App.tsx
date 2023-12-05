@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { render } from "react-dom";
 import "../css/app.css";
 import "../css/bar.css";
@@ -27,14 +27,15 @@ enum Pane {
 
 const App = () => {
   
-  const [email, setEmail] = React.useState<string>("");
-  const [library, setLibrary] = React.useState<Library>();
-  const [pane, setPane] = React.useState<Pane>(Pane.CHAT);
-  const [idToken, setIdToken] = React.useState<string>("");
-  const [signing, setSigning] = React.useState<boolean>(false);
-  const [libraryReady, setLibraryReady] = React.useState(false);
-  const [signInText, setSignInText] = React.useState("Sign In");
-  const [healthStatus, setHealthStatus] = React.useState("❌");;
+  const [email, setEmail] = useState<string>("");
+  const [library, setLibrary] = useState<Library>();
+  const [pane, setPane] = useState<Pane>(Pane.CHAT);
+  const [idToken, setIdToken] = useState<string>("");
+  const [signing, setSigning] = useState<boolean>(false);
+  const [libraryReady, setLibraryReady] = useState(false);
+  const [signInText, setSignInText] = useState("Sign In");
+  const [healthStatus, setHealthStatus] = useState("❌");;
+  const [downloadFileUrl, setdownloadFileUrl] = useState(''); // State to store URL for test file to be downloaded
   
   useEffect(() => {
     setLibrary(new Library())
@@ -69,6 +70,19 @@ const App = () => {
     })
   }, [library])
 
+  const handleDownloadClick = async () => {
+    try {
+      const response = await fetch(downloadFileUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Set the file URL in state
+      setdownloadFileUrl(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  };
+
   const interactWithSignButton = () => {
     if(signing) return;
     if (typeof library == 'undefined' || libraryReady) {
@@ -93,7 +107,11 @@ const App = () => {
     }
   };
   
-  const [notification, setNotification] = React.useState<{[key: string]: string}>({});
+  const [notification, setNotification] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    setdownloadFileUrl('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf');
+  });
 
   useEffect(() => {
     if (typeof library == 'undefined') return;
@@ -141,7 +159,7 @@ const App = () => {
   }, [pane])
 
 
-  return (
+  return ( 
     <div className="app">
         <div className="bar">
           <div id="logo" style={{"paddingTop": "0.5rem", display: libraryReady ? "flex" : "none"}}>
@@ -216,6 +234,16 @@ const App = () => {
                     
                 </div>
                 <div id="server-health">Serverless {healthStatus}</div>
+                <div>
+                  <button 
+                    id="chatui-download-btn"
+                    className="chatui-btn"
+                    onClick={handleDownloadClick}
+                    disabled={!downloadFileUrl}
+                  >
+                    Download 📚
+                  </button>
+                </div>
               </div>)
           }
         </div>
