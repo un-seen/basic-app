@@ -22,6 +22,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   
   const queueMessage = (replace: boolean, alignment: "left" | "right", text: string, image_url: string | null = null, video_url: string | null = null) => {
     setQueuedChat([...queuedChat, () => replace ? updateLastMessage(alignment, text) : appendMessage(alignment, text, image_url, video_url)])
+    setTimeout(() => setTriggerDialog(text), 1000);
   };
 
   useEffect(() => {
@@ -189,23 +190,16 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         queueMessage(false, "left", "Searching library...");
         let sanitized_prompt = prompt.replace("catalog", "").trim();
         const catalog = await props.library.findImage(sanitized_prompt, 50);
-        queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
-        setTimeout(() => setTriggerDialog(prompt), 1000);
-        catalog['response'] = JSON.parse(catalog['response']);
         
-        let ct = 0;
+        queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
+        catalog['response'] = JSON.parse(catalog['response']);
         for (const item of catalog["response"]) {
           const url = item["image"];
           let caption = item["caption"];
           caption = caption.charAt(0).toUpperCase() + caption.substr(1).toLowerCase()
           let text = `This file with name ${item['id']}. ${caption}`;
-          setTriggerDialog(caption);
           queueMessage(false, "left", text, url);
-          setTriggerDialog(caption + "_added");
-          ct += 1;
-          if (ct > 4) {
-            break;
-          }
+          setTriggerDialog(caption + "T");
         }
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
         let query = prompt.replaceAll("seek", "");

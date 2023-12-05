@@ -103,7 +103,7 @@ const App = () => {
 
       setInterval(() => {
         (async () => await library.getNotification().then((value: {[key: string]: string}) => {
-          if (typeof value == 'undefined') return;
+          if (typeof value == 'undefined' || typeof value['commit_id'] == 'undefined') return;
           if (value["commit_id"].length > 0) {
             setNotification(value)
           }
