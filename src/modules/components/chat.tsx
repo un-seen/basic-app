@@ -187,7 +187,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       if (prompt.includes("catalog") && typeof props.library !== "undefined") {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
-        const catalog = await props.library.findImage(prompt, 3);
+        let sanitized_prompt = prompt.replace("catalog", "").trim();
+        const catalog = await props.library.findImage(sanitized_prompt, 50);
         queueMessage(true, "left", `Here is the personalized catalog for your prompt.`);
         setTimeout(() => setTriggerDialog(prompt), 1000);
         catalog['response'] = JSON.parse(catalog['response']);
