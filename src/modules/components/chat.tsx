@@ -208,7 +208,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
-        const frames = await props.library.seekVideo(query, 3);
+        const frames = await props.library.findVideo(query, 50);
         
         queueMessage(
           true,
@@ -225,34 +225,6 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           setTriggerDialog(timestamp);
           queueMessage(false, "left", message, frame);
           setTriggerDialog(timestamp + "T");
-          ct += 1;
-          if (ct > 1) {
-            break;
-          }
-        }
-      } else if (prompt.includes("?") && typeof props.library !== "undefined") {
-        appendMessage("right", prompt);    
-        queueMessage(false, "left", "Searching library...");
-        const conversations = await props.library.findConversation(prompt.replaceAll("?", ""), 3);
-        setTriggerDialog("?s");
-        queueMessage(
-          true,
-          "left",
-          `Here is the list of conversations for your prompt.`
-        );
-        let ct = 0;
-        for (const item of conversations.response) {
-          const question = item["question"];
-          const answer = item["answer"];
-          const text = `
-          question: ${question}
-          answer: ${answer}`
-          queueMessage(false, "left", text);
-          setTriggerDialog(text);
-          ct += 1;
-          if (ct > 1) {
-            break;
-          }
         }
       } else {
         appendMessage("right", prompt);    
@@ -261,7 +233,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           "content": prompt,
           "role": "user"
         }]
-        const result = await props.library.generateResponse(messages)
+        const result = await props.library.generate(messages)
         queueMessage(true, "left", result["response"], true)
         setTriggerDialog(prompt)
         setTimeout(() => {
@@ -270,7 +242,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }, 2000)
       }
     } catch (err) {
-      queueMessage(false, "error", "Generate error, " + err.toString());
+      queueMessage(false, "left", "error", "Generate error, " + err.toString());
     }
   };
 
