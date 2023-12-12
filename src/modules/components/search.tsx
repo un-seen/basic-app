@@ -6,10 +6,8 @@ import { convertSeconds } from "./math";
 
 interface SearchItem {
 	id: string;
-	url: string;
 	image: string;
 	caption: string;
-	timestamp: string;
 }
 
 interface SearchProps {
@@ -37,18 +35,27 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 	useEffect(() => {
 		setLoading(true)
 		Toast("Searching 🔍")
-		props.library.seekVideo(prompt, 10).then((frames) => {
+		props.library.findVideo(prompt, 100).then((frames) => {
 			const items: SearchItem[] = []
 			for (const item of frames["response"]) {
 				items.push({
 					id: item["id"],
-					url: item["path"],
 					image: item["frame"],
 					caption: item['caption'],
-					timestamp: convertSeconds(item['timestamp'])
 				});
 			}
-			setSearchItems([...items])
+			props.library.findImage(prompt, 100).then((images) => {
+				images = JSON.parse(images["response"])
+				console.log(images)
+				for (const item of images) {
+					items.push({
+						id: item["id"],
+						image: item["image"],
+						caption: item['caption'],
+					});
+				}
+				setSearchItems([...items])
+			})
 		})
 	}, [prompt])
 
@@ -70,6 +77,7 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 				<ul className="sec-middle" id="vid-grid">
 					{
 						searchItems.map((item) => {
+							console.log(item)
 							const imageInfo = `data:image/jpeg;base64,${(item.image).replace(/^b'|'$/g, "")}`;
 							return (
 								<li className="thumb-wrap">
@@ -77,8 +85,6 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 										<img className="thumb"  src={imageInfo} alt={item.caption}/>
 										<div className="thumb-info">
 											<p className="thumb-title">{item.caption}</p>
-											<p className="thumb-user">{item.url}</p>
-											<p className="thumb-text">{item.timestamp}</p>
 										</div>
 									</a>
 								</li>

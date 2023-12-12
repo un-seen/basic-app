@@ -1,6 +1,7 @@
 .searchui {
     background-color: inherit;
     padding-bottom: 5rem;
+    overflow-y: scroll;
 }
 
 .sec {
