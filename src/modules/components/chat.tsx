@@ -5,7 +5,6 @@ import { Library, PromptData } from "hedwigai"
 import { convertSeconds, getRandomId } from "./math";
 
 interface ChatProps {
-  disabled: boolean;
   library: Library;
 }
 
@@ -247,7 +246,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   };
 
   return (
-    <div className="glass" style={{"display": (props.disabled || typeof props.library == 'undefined') ? "none" : "flex"}}>
+    <div className="glass" style={{"display": "flex"}}>
       <div
         className="chatui-chat"
         id="chatui-chat"

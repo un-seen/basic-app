@@ -3,6 +3,24 @@ import '../../css/atlas.css';
 import * as THREE from 'three';
 import { Library } from "hedwigai";
 import ForceGraph3D from '3d-force-graph';
+import prettyBytes from 'pretty-bytes';
+import '../../css/files.css';
+import Toast from "./Toast";
+
+enum Atlas {
+    Graph3D,
+    Graph2D,
+    Files
+}
+
+interface FileItem {
+	id: string;
+	extension: string;
+    size: string;
+	last_modified: string;
+    last_indexed: string;
+}
+
 interface AtlasProps {
     library: Library;
 }
@@ -11,18 +29,36 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
 
     const ref = React.createRef<HTMLDivElement>();
     const [graphData, setGraphData] = React.useState<any>({ nodes: [], links: [] });
+    const [atlas, setAtlas] = React.useState<Atlas>(Atlas.Files);
+    const [files, setFiles] = React.useState<any[]>([]);
 
     useEffect(() => {
-        props.library.getGraph().then((graph) => {
-            setGraphData(graph);
-        })
-    }, [])
+        if (atlas === Atlas.Files) {
+            props.library.getFiles(1000).then((response: unknown) => {
+                let files = response["response"]
+                let data: FileItem[] = []
+                console.log(files)
+                for(const item of files) {
+                    let file_id = item["id"]["id"]["String"]
+                    file_id =  file_id.split("/").slice(1).join("/")
+                    data.push({
+                        "id": file_id,
+                        "extension": item["extension"],
+                        "size": prettyBytes(item["size"]),
+                        "last_modified": item["last_modified"],
+                        "last_indexed": item["last_modified"]
+                    })
+                }
+                Toast(`Found ${data.length} files 📚`)
+                setFiles(data);
+            })
+        } else if (atlas === Atlas.Graph2D || atlas === Atlas.Graph3D) {
+            props.library.getGraph().then((graph) => {
+                setGraphData(graph);
+            })
+        }
+    }, [graphData])
 
-    useEffect(() => {
-        props.library.getGraph().then((graph) => {
-            setGraphData(graph);
-        })
-    }, [])
 
     useEffect(() => {
         if (ref.current == null) {
@@ -75,8 +111,34 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
     }, [graphData])
 
     return (
-        <div ref={ref} className="atlasui">
+        
+        <div style={{"display": "flex", alignItems: "center", justifyContent: "center", width: "50%"}}>
+            { atlas == Atlas.Files ? (
+                <table className="container" style={{borderWidth: files.length > 0 ? "0.01rem" : "0"}}>
+                <tbody>
+                    <tr style={{"display": files.length > 0 ? "" : "none"}}>
+                        <th><h1>id</h1></th>
+                        <th><h1>extension</h1></th>
+                        <th><h1>size</h1></th>
+                        <th><h1>last_modified</h1></th>
+                        <th><h1>last_indexed</h1></th>
+                    </tr>
+                    {files.map((file) => {
+                        return <tr>
+                            <td>{file.id}</td>
+                            <td>{file.extension}</td>
+                            <td>{file.size}</td>
+                            <td>{file.last_modified}</td>
+                            <td>{file.last_indexed}</td>
+                        </tr>
+                    })}
+                </tbody>
+                </table>
+            ) : null }
+            { atlas == Atlas.Graph3D ? <div ref={ref} className="graph-container"></div> : null }
+            { atlas == Atlas.Graph2D ? <div ref={ref} className="graph-container"></div> : null }
         </div>
+        
     )
 }
 

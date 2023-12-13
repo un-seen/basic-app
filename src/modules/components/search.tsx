@@ -11,7 +11,6 @@ interface SearchItem {
 }
 
 interface SearchProps {
-	disabled: boolean;
 	library: Library;
 }
 

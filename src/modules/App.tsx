@@ -188,12 +188,17 @@ const App = () => {
             <div id="stars2"></div>
             <div id="stars3"></div>
           </div>
-          <ChatUI disabled={!(libraryReady && typeof library != 'undefined' && pane==Pane.CHAT)} library={library}/>
+          {
+            libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && <ChatUI library={library}/>
+          }
           {
             libraryReady && typeof library != 'undefined' && pane==Pane.CHAT && !isMobile && <AtlasUI library={library}/>
           }
           {
-            libraryReady && typeof library != 'undefined' && pane==Pane.SEARCH && <SearchUI library={library}/>
+            libraryReady && typeof library != 'undefined' && pane==Pane.SEARCH && <SearchUI library={library} />
+          }
+          {
+            libraryReady && typeof library != 'undefined' && pane==Pane.FILES && <FilesUI library={library} />
           }
           {
             !libraryReady && (<div className="landing">
