@@ -228,12 +228,8 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       } else {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Thinking...")
-        const messages: PromptData[] = [{
-          "content": prompt,
-          "role": "user"
-        }]
-        const result = await props.library.generate(messages)
-        queueMessage(true, "left", result["response"], true)
+        const result = await props.library.generate(prompt)
+        queueMessage(true, "left", result["text"], true)
         setTriggerDialog(prompt)
         setTimeout(() => {
           queueMessage(false, "left", "Please give a prompt with keyword  \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");

@@ -34,10 +34,9 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
 
     useEffect(() => {
         if (atlas === Atlas.Files) {
-            props.library.getFiles(1000).then((response: unknown) => {
+            props.library.getFiles(100000).then((response: unknown) => {
                 let files = response["response"]
                 let data: FileItem[] = []
-                console.log(files)
                 for(const item of files) {
                     let file_id = item["id"]["id"]["String"]
                     file_id =  file_id.split("/").slice(1).join("/")
@@ -46,7 +45,7 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
                         "extension": item["extension"],
                         "size": prettyBytes(item["size"]),
                         "last_modified": item["last_modified"],
-                        "last_indexed": item["last_modified"]
+                        "last_indexed": item["last_indexed"]
                     })
                 }
                 Toast(`Found ${data.length} files 📚`)
