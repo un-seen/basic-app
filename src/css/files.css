@@ -28,6 +28,7 @@
     text-align: center;
     color: #ffffff;
     width: 5rem;
+    max-width: 10vw;
 }
 
 .container th h1 {

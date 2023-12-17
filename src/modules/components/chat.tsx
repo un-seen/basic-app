@@ -17,22 +17,23 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [queuedChat, setQueuedChat] = React.useState<(() => void)[]>([]);
   const uiChat = React.useRef<HTMLDivElement>(null);
   const [uiChatInput, setUiChatInput] = React.useState<string>("");
+  let randomMessageId = null;
   const fileInput = React.useRef<HTMLInputElement>(null);
-  
+  const [textResponse, setTextResponse] = React.useState<string>("");
+
   const queueMessage = (replace: boolean, alignment: "left" | "right", text: string, image_url: string | null = null, video_url: string | null = null) => {
     setQueuedChat([...queuedChat, () => replace ? updateLastMessage(alignment, text) : appendMessage(alignment, text, image_url, video_url)])
     setTimeout(() => setTriggerDialog(text), 1000);
   };
 
   useEffect(() => {
-    // if (chatLoaded) return;
     appendMessage("left", "Please give a prompt with keyword  \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
-
-    () => {
+    props.library.setTextResponse(onTextMessage);
+    (() => {
       uiChat.current?.childNodes.forEach((node) => {
         node.remove();
       })
-    }
+    })
   }, [])
 
   const changeFileInput = () => {
@@ -81,6 +82,39 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     });
   };
 
+  const createNewMessage = (kind: string) => {
+    randomMessageId = getRandomId();
+    const msg = `
+        <div class="msg ${kind}-msg">
+          <div class="msg-bubble">
+            <div id=${randomMessageId} class="msg-text typed"></div>
+          </div>
+        </div>
+      `;
+    uiChat?.current?.insertAdjacentHTML("beforeend", msg);
+    return randomMessageId;
+  }
+
+  const onTextMessage = (response_str: string) => {
+    if (randomMessageId == null) {
+      randomMessageId = createNewMessage("left");
+    }
+    const response = JSON.parse(response_str);
+    const choices = response["choices"]
+    let paragraph = document.getElementById(randomMessageId);
+    if (choices.length > 0) {
+      const text = choices[0]["text"]
+      let charElement = document.createTextNode(text);
+      paragraph.appendChild(charElement);
+    }
+    if (textResponse.endsWith(".") || choices[0]["finish_reason"]) {
+      document.getElementById(randomMessageId)?.classList.replace("typed", "typed-complete")      
+      setTriggerDialog(randomMessageId)
+      randomMessageId = null;
+    }
+    uiChat?.current?.scrollTo(0, uiChat.current.scrollHeight)
+  }
+
   useEffect(() => {
     if (queuedChat.length > 0) {
       const task = queuedChat[0];
@@ -116,14 +150,15 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       }
   }
     if (image_url !== null) {
+      const image_elem = image_url.startsWith("http") ? `<img src="${image_url}" alt="${text}">` : `<img src="data:image/jpeg;base64,${(
+        image_url as string
+      ).replace(/^b'|'$/g, "")}" alt="${text}">`
       msg = `
         <div class="msg ${kind}-msg">
           <div class="msg-bubble">
             <div id=${randomId} class="msg-text typed"></div>
             <div class="circular-image">
-                <img src="data:image/jpeg;base64,${(
-                  image_url as string
-                ).replace(/^b'|'$/g, "")}" alt="${text}">
+              ${image_elem}  
             </div>
           </div>
         </div>
@@ -200,6 +235,19 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           queueMessage(false, "left", text, url);
           setTriggerDialog(caption + "T");
         }
+      } else if (prompt.includes("imagine") && typeof props.library !== "undefined") {
+        let query = prompt.replaceAll("imagine", "");
+        if(query.length == 0) {
+          return
+        }
+        appendMessage("right", prompt);    
+        queueMessage(false, "left", "Imagining takes 20-30 seconds 🕑...");
+        const output = await props.library.diffuse(query);
+        queueMessage(true, "left", "Imagined 🎨!");
+        setTriggerDialog("Imagined");
+        setTriggerDialog("Imagined Done");
+        queueMessage(false, "left", "", output["image"]);
+        setTriggerDialog(prompt + "TSS");
       } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
         let query = prompt.replaceAll("seek", "");
         if(query.length == 0) {
@@ -227,14 +275,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
       } else {
         appendMessage("right", prompt);    
-        queueMessage(false, "left", "Thinking...")
-        const result = await props.library.generate(prompt)
-        queueMessage(true, "left", result["text"], true)
-        setTriggerDialog(prompt)
-        setTimeout(() => {
-          queueMessage(false, "left", "Please give a prompt with keyword  \n [1] `catalog` for images \n  [2] `seek` for videos \n  [3] `?` for conversation");
-          setTriggerDialog("generated");
-        }, 2000)
+        await props.library.llm("user", prompt)
       }
     } catch (err) {
       queueMessage(false, "left", "error", "Generate error, " + err.toString());
