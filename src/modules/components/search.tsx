@@ -45,7 +45,6 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 			}
 			props.library.findImage(prompt, 100).then((images) => {
 				images = JSON.parse(images["response"])
-				console.log(images)
 				for (const item of images) {
 					items.push({
 						id: item["id"],
@@ -76,7 +75,6 @@ const SearchUI: React.FC<SearchProps> = (props: SearchProps) => {
 				<ul className="sec-middle" id="vid-grid">
 					{
 						searchItems.map((item) => {
-							console.log(item)
 							const imageInfo = `data:image/jpeg;base64,${(item.image).replace(/^b'|'$/g, "")}`;
 							return (
 								<li className="thumb-wrap">

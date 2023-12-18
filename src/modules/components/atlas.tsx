@@ -39,7 +39,10 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
                 let data: FileItem[] = []
                 for(const item of files) {
                     let file_id = item["id"]["id"]["String"]
-                    file_id =  file_id.split("/").slice(1).join("/")
+                    if (file_id.indexOf("/") > 0) {
+                        file_id = file_id.slice(file_id.indexOf("/") + 1)
+                    }
+
                     data.push({
                         "id": file_id,
                         "extension": item["extension"],
@@ -115,7 +118,7 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
             { atlas == Atlas.Files ? (
                 <table className="container" style={{borderWidth: files.length > 0 ? "0.01rem" : "0"}}>
                 <tbody>
-                    <tr style={{"display": files.length > 0 ? "" : "none"}}>
+                    <tr style={{"display": files.length > 0 ? "" : "none"}} key={"header"}>
                         <th><h1>id</h1></th>
                         <th><h1>extension</h1></th>
                         <th><h1>size</h1></th>
@@ -123,7 +126,7 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
                         <th><h1>last_indexed</h1></th>
                     </tr>
                     {files.map((file) => {
-                        return <tr>
+                        return <tr key={file.id}>
                             <td>{file.id}</td>
                             <td>{file.extension}</td>
                             <td>{file.size}</td>

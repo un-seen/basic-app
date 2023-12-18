@@ -17,7 +17,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
   const [queuedChat, setQueuedChat] = React.useState<(() => void)[]>([]);
   const uiChat = React.useRef<HTMLDivElement>(null);
   const [uiChatInput, setUiChatInput] = React.useState<string>("");
-  let randomMessageId = null;
+  let randomMessageId: string | null = null;
   const fileInput = React.useRef<HTMLInputElement>(null);
   const [textResponse, setTextResponse] = React.useState<string>("");
 
