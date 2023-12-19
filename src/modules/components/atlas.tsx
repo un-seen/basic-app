@@ -25,6 +25,8 @@ interface AtlasProps {
     library: Library;
 }
 
+const LARGE_NUMBER = 100000
+
 const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
 
     const ref = React.createRef<HTMLDivElement>();
@@ -34,8 +36,12 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
 
     useEffect(() => {
         if (atlas === Atlas.Files) {
-            props.library.getFiles(100000).then((response: unknown) => {
+            props.library.getFiles(LARGE_NUMBER).then((response: unknown) => {
+                if (!response) {
+                    return
+                }
                 let files = response["response"]
+                console.log(response)
                 let data: FileItem[] = []
                 for(const item of files) {
                     let file_id = item["id"]["id"]["String"]
