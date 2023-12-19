@@ -41,7 +41,6 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
                     return
                 }
                 let files = response["response"]
-                console.log(response)
                 let data: FileItem[] = []
                 for(const item of files) {
                     let file_id = item["id"]["id"]["String"]
