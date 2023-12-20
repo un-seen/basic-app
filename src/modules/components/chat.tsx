@@ -275,7 +275,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         }
       } else {
         appendMessage("right", prompt);    
-        await props.library.llm("user", prompt)
+        await props.library.llm("user", prompt.toLowerCase())
       }
     } catch (err) {
       queueMessage(false, "left", "error", "Generate error, " + err.toString());

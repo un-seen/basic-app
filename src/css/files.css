@@ -7,6 +7,7 @@
     position: relative;
     user-select: none;
     box-sizing: border-box;
+    table-layout:fixed;
     font-family: 'Saira Semi Condensed', sans-serif;
     border: lawngreen 0.01em solid;
 }
@@ -20,6 +21,8 @@
 }
 
 .container td {
+    text-wrap: break-word;
+    overflow-wrap: break-word;
     font-weight: normal;
     font-size: 0.8rem;
     -webkit-box-shadow: 0 2px 2px -2px #0E1119;

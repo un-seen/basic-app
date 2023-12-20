@@ -31,8 +31,15 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
 
     const ref = React.createRef<HTMLDivElement>();
     const [graphData, setGraphData] = React.useState<any>({ nodes: [], links: [] });
+    const [render, setRender] = React.useState<boolean>(false);
     const [atlas, setAtlas] = React.useState<Atlas>(Atlas.Files);
     const [files, setFiles] = React.useState<any[]>([]);
+
+    useEffect(() => {
+        setInterval(() => {
+            setRender(!render)
+        }, 5000)
+    }, [])
 
     useEffect(() => {
         if (atlas === Atlas.Files) {
@@ -56,16 +63,18 @@ const AtlasUI: React.FC<AtlasProps> = (props: AtlasProps) => {
                         "last_indexed": item["last_indexed"]
                     })
                 }
-                Toast(`Found ${data.length} files 📚`)
                 setFiles(data);
+                if (data.length > files.length) {
+                    Toast(`Found ${data.length} files 📚`)
+                }
+                
             })
         } else if (atlas === Atlas.Graph2D || atlas === Atlas.Graph3D) {
             props.library.getGraph().then((graph) => {
                 setGraphData(graph);
             })
         }
-    }, [graphData])
-
+    }, [atlas, render])
 
     useEffect(() => {
         if (ref.current == null) {
