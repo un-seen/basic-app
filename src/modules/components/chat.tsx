@@ -219,7 +219,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     setUiChatInput("")
 
     try {
-      if (prompt.includes("catalog") && typeof props.library !== "undefined") {
+      if (prompt.startsWith("catalog") && typeof props.library !== "undefined") {
         appendMessage("right", prompt);    
         queueMessage(false, "left", "Searching library...");
         let sanitized_prompt = prompt.replace("catalog", "").trim();
@@ -235,7 +235,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
           queueMessage(false, "left", text, url);
           setTriggerDialog(caption + "T");
         }
-      } else if (prompt.includes("imagine") && typeof props.library !== "undefined") {
+      } else if (prompt.startsWith("imagine") && typeof props.library !== "undefined") {
         let query = prompt.replaceAll("imagine", "");
         if(query.length == 0) {
           return
@@ -248,7 +248,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
         setTriggerDialog("Imagined Done");
         queueMessage(false, "left", "", output["image"]);
         setTriggerDialog(prompt + "TSS");
-      } else if (prompt.includes("seek") && typeof props.library !== "undefined") {
+      } else if (prompt.startsWith("seek") && typeof props.library !== "undefined") {
         let query = prompt.replaceAll("seek", "");
         if(query.length == 0) {
           return
