@@ -102,7 +102,7 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
     const response = JSON.parse(response_str);
     const choices = response["choices"]
     let paragraph = document.getElementById(randomMessageId);
-    if (choices.length > 0) {
+    if (choices.length > 0 && paragraph != null) {
       const text = choices[0]["text"]
       let charElement = document.createTextNode(text);
       paragraph.appendChild(charElement);
@@ -140,13 +140,15 @@ const ChatUI: React.FC<ChatProps> = (props: ChatProps) => {
       let textChar = text.charAt(textLength++);
       let paragraph = document.getElementById(randomId);
       let charElement = document.createTextNode(textChar);
-      paragraph.appendChild(charElement);
-      if(textLength < text.length+1) {
-          setTimeout(() => typeCharacter(), 10);
-      } else {
-          document.getElementById(randomId)?.classList.replace("typed", "typed-complete")
-          text = '';
-          setTriggerDialog(randomId)
+      if (paragraph !== null) {
+        paragraph.appendChild(charElement);
+        if(textLength < text.length+1) {
+            setTimeout(() => typeCharacter(), 10);
+        } else {
+            document.getElementById(randomId)?.classList.replace("typed", "typed-complete")
+            text = '';
+            setTriggerDialog(randomId)
+        }
       }
   }
     if (image_url !== null) {
